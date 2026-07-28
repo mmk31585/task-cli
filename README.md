@@ -292,25 +292,25 @@ Before any implementation begins:
 
 - ✅ Run `go mod init github.com/mmk31585/task-cli`
 - ✅ Create `cmd/task-cli/main.go` with a minimal `func main()` that prints a help message
-- [ ] Create placeholder files in each `internal/` package (one `.go` file per package with `package <name>`)
+- ✅ Create placeholder files in each `internal/` package (one `.go` file per package with `package <name>`)
 - ✅ Create `pkg/uuid/uuid.go` placeholder
 - ✅ Verify `go build ./...` succeeds
 - ✅ Verify `go vet ./...` succeeds
 - ✅ Verify `go test ./...` succeeds (zero tests is OK at this stage)
 - ✅ Verify `gofmt -s .` produces no diffs
-- [ ] Commit: `chore: bootstrap Go module and project skeleton`
+- ✅ Commit: `chore: bootstrap Go module and project skeleton`
 
 **Testing Checklist:**
 
-- [ ] No tests required for this phase
-- [ ] CI passes `go build` and `go vet`
+- ✅ No tests required for this phase
+- ✅ CI passes `go build` and `go vet`
 
 **Definition of Done:**
 
-- [ ] `go build -o /dev/null ./cmd/task-cli` produces a binary
-- [ ] `go vet ./...` is clean
-- [ ] Every package directory has at least one `.go` file
-- [ ] `go.mod` exists with module path `github.com/mmk31585/task-cli`
+- ✅ `go build -o /dev/null ./cmd/task-cli` produces a binary
+- ✅ `go vet ./...` is clean
+- ✅ Every package directory has at least one `.go` file
+- ✅ `go.mod` exists with module path `github.com/mmk31585/task-cli`
 
 ---
 
@@ -324,13 +324,13 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `Status` as a typed string with constants `StatusTodo`, `StatusInProgress`, `StatusDone`
-- [ ] Define `IsValidStatus(s Status) bool` function
-- [ ] Define `Task` struct with fields: `ID`, `Description`, `Status`, `CreatedAt`, `UpdatedAt`
-- [ ] Add JSON struct tags (`json:"id"`, `json:"description"`, etc.)
-- [ ] Use `time.Time` for timestamp fields
-- [ ] Define sentinel errors: `ErrTaskNotFound`, `ErrInvalidStatus`, `ErrEmptyDescription`, `ErrDescriptionTooLong`
-- [ ] Verify package compiles: `go build ./internal/domain/...`
+- ✅ Define `Status` as a typed string with constants `StatusTodo`, `StatusInProgress`, `StatusDone`
+- ✅ Define `IsValidStatus(s Status) bool` function
+- ✅ Define `Task` struct with fields: `ID`, `Description`, `Status`, `CreatedAt`, `UpdatedAt`
+- ✅ Add JSON struct tags (`json:"id"`, `json:"description"`, etc.)
+- ✅ Use `time.Time` for timestamp fields
+- ✅ Define sentinel errors: `ErrTaskNotFound`, `ErrInvalidStatus`, `ErrEmptyDescription`, `ErrDescriptionTooLong`
+- ✅ Verify package compiles: `go build ./internal/domain/...`
 - [ ] Commit: `feat(domain): add Task entity, Status type, and domain errors`
 
 **Testing Checklist:**

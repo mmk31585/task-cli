@@ -478,8 +478,8 @@ type Task struct {
     ID          string    `json:"id"`
     Description string    `json:"description"`
     Status      Status    `json:"status"`
-    CreatedAt   time.Time `json:"createdAt"`
-    UpdatedAt   time.Time `json:"updatedAt"`
+    CreatedAt   time.Time `json:"created_at"`
+    UpdatedAt   time.Time `json:"updated_at"`
 }
 ```
 
@@ -1195,15 +1195,15 @@ The entire task collection is stored in a single JSON array:
         "id": "018c4f3a-7e2c-7b00-8000-000000000001",
         "description": "Buy groceries",
         "status": "todo",
-        "createdAt": "2026-07-27T10:30:00Z",
-        "updatedAt": "2026-07-27T10:30:00Z"
+        "created_at": "2026-07-27T10:30:00Z",
+        "updated_at": "2026-07-27T10:30:00Z"
     },
     {
         "id": "018c4f3a-7e2c-7b00-8000-000000000002",
         "description": "Write documentation",
         "status": "in-progress",
-        "createdAt": "2026-07-27T11:00:00Z",
-        "updatedAt": "2026-07-27T12:15:00Z"
+        "created_at": "2026-07-27T11:00:00Z",
+        "updated_at": "2026-07-27T12:15:00Z"
     }
 ]
 ```
@@ -1385,7 +1385,7 @@ func (h *Handler) run(args []string) {
 
 | Condition | CLI Output |
 |---|---|
-| Success (add) | `{"id":"...","description":"...","status":"todo","createdAt":"..."}` |
+| Success (add) | `{"id":"...","description":"...","status":"todo","created_at":"..."}` |
 | Success (list) | `[{"id":"...",...}, ...]` or table |
 | Success (delete) | `{"deleted":"018c..."}` |
 | Empty description | `Error: description cannot be empty` |
@@ -2018,7 +2018,7 @@ func (s *TaskService) AddTask(description string) (domain.Task, error) {
 
 - Optional remote storage (S3, GCS, custom server).
 - Configurable via `TASK_CLI_SYNC_URL` env var.
-- Conflict resolution based on `updatedAt`.
+- Conflict resolution based on `updated_at`.
 
 ---
 
