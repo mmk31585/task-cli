@@ -24,6 +24,5 @@ func IsValidStatus(status Status) bool {
 		return true
 	default:
 		return false
-
 	}
 }

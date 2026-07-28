@@ -331,58 +331,22 @@ Before any implementation begins:
 - ✅ Use `time.Time` for timestamp fields
 - ✅ Define sentinel errors: `ErrTaskNotFound`, `ErrInvalidStatus`, `ErrEmptyDescription`, `ErrDescriptionTooLong`
 - ✅ Verify package compiles: `go build ./internal/domain/...`
-- [ ] Commit: `feat(domain): add Task entity, Status type, and domain errors`
+- ✅ Commit: `feat(domain): add Task entity, Status type, and domain errors`
 
 **Testing Checklist:**
 
-- [ ] Test `IsValidStatus("todo")` returns `true`
-- [ ] Test `IsValidStatus("invalid")` returns `false`
-- [ ] Test sentinel errors are non-nil and comparable with `errors.Is`
-- [ ] Test `Task` struct fields have correct JSON tags
+- ✅ Test `IsValidStatus("todo")` returns `true`
+- ✅ Test `IsValidStatus("invalid")` returns `false`
+- ✅ Test sentinel errors are non-nil and comparable with `errors.Is`
+- ✅ Test `Task` struct fields have correct JSON tags
 
 **Definition of Done:**
 
-- [ ] All domain types compile and pass tests
-- [ ] Package imports only `time` and `encoding/json` from stdlib
-- [ ] Package has zero imports from other project packages
+- ✅ All domain types compile and pass tests
+- ✅ Package imports only `time` and `encoding/json` from stdlib
+- ✅ Package has zero imports from other project packages
 
----
 
-### Phase 3 — ID Generation (`pkg/uuid`)
-
-**Objective:** Implement UUIDv7 generation using only the Go standard library.
-
-**Deliverables:**
-- `pkg/uuid/uuid.go` — `NewV7() (string, error)` function
-
-**TODO Checklist:**
-
-- [ ] Implement `NewV7()` that encodes Unix millisecond timestamp in first 6 bytes
-- [ ] Use `crypto/rand` for the remaining 10 random bytes
-- [ ] Set UUID version nibble to `7` at the appropriate position
-- [ ] Set UUID variant bits (RFC 4122)
-- [ ] Format output as `xxxxxxxx-xxxx-7xxx-axxx-xxxxxxxxxxxx`
-- [ ] Verify generated IDs are time-sortable (later IDs > earlier IDs)
-- [ ] Verify generated IDs are unique across 100,000 calls
-- [ ] Document that the package uses only `crypto/rand` and `time` from stdlib
-- [ ] Commit: `feat(uuid): add UUIDv7 generator using crypto/rand`
-
-**Testing Checklist:**
-
-- [ ] Test `NewV7()` returns a valid UUID format (36 chars, 5 groups, hyphens)
-- [ ] Test `NewV7()` returns a unique value on consecutive calls
-- [ ] Test UUID version byte is `7` (extract and assert)
-- [ ] Test UUID variant bits are correct
-- [ ] Test that 1000 generated IDs are all unique (store in map)
-- [ ] Test time-ordering: ID generated 1ms later has a larger string value
-
-**Definition of Done:**
-
-- [ ] `NewV7()` produces valid UUIDv7 strings
-- [ ] No external dependencies (only `crypto/rand`, `fmt`, `time`)
-- [ ] Test coverage > 95%
-
----
 
 ### Phase 4 — JSON Storage
 
