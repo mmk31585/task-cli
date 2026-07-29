@@ -473,7 +473,7 @@ Concerns are separated by package boundary:
 
 ```go
 type Task struct {
-    ID          string    `json:"id"`
+    ID          int64     `json:"id"`
     Description string    `json:"description"`
     Status      Status    `json:"status"`
     CreatedAt   time.Time `json:"created_at"`
@@ -497,11 +497,11 @@ const (
 
 ```go
 type TaskRepository interface {
-    Add(task domain.Task) error
+    Add(description string) (domain.Task, error)
     GetAll() ([]domain.Task, error)
-    GetByID(id string) (domain.Task, error)
-    Update(task domain.Task) error
-    Delete(id string) error
+    GetByID(id int64) (domain.Task, error)
+    Update(task domain.Task) (domain.Task, error)
+    Delete(id int64) error
 }
 ```
 
@@ -602,20 +602,20 @@ classDiagram
 
     class TaskRepository {
         <<interface>>
-        +Add(Task) error
-        +GetAll() []Task
-        +GetByID(string) Task
-        +Update(Task) error
-        +Delete(string) error
+        +Add(description string) (Task, error)
+        +GetAll() ([]Task, error)
+        +GetByID(int64) (Task, error)
+        +Update(Task) (Task, error)
+        +Delete(int64) error
     }
 
     class JSONTaskRepository {
         -JSONStorage storage
-        +Add(Task) error
-        +GetAll() []Task
-        +GetByID(string) Task
-        +Update(Task) error
-        +Delete(string) error
+        +Add(description string) (Task, error)
+        +GetAll() ([]Task, error)
+        +GetByID(int64) (Task, error)
+        +Update(Task) (Task, error)
+        +Delete(int64) error
     }
 
     class JSONStorage {
@@ -626,11 +626,11 @@ classDiagram
 
     class TaskService {
         -TaskRepository repo
-        +AddTask(string) Task
-        +ListTasks(string) []Task
-        +UpdateTask(string, string) Task
-        +DeleteTask(string) error
-        +MarkStatus(string, Status) Task
+        +AddTask(string) (Task, error)
+        +ListTasks(string) ([]Task, error)
+        +UpdateTask(int64, string) (Task, error)
+        +DeleteTask(int64) error
+        +MarkStatus(int64, Status) (Task, error)
     }
 
     class CLIHandler {
@@ -970,9 +970,9 @@ func (h *Handler) HandleMark(args []string, status domain.Status)
 func NewTaskService(repo repository.TaskRepository) *TaskService
 func (s *TaskService) AddTask(description string) (domain.Task, error)
 func (s *TaskService) ListTasks(status string) ([]domain.Task, error)
-func (s *TaskService) UpdateTask(id, description string) (domain.Task, error)
-func (s *TaskService) DeleteTask(id string) error
-func (s *TaskService) MarkTask(id string, status domain.Status) (domain.Task, error)
+func (s *TaskService) UpdateTask(id int64, description string) (domain.Task, error)
+func (s *TaskService) DeleteTask(id int64) error
+func (s *TaskService) MarkTask(id int64, status domain.Status) (domain.Task, error)
 ```
 
 **Internal implementation:**
@@ -998,11 +998,11 @@ func (s *TaskService) MarkTask(id string, status domain.Status) (domain.Task, er
 **Public interface:**
 ```go
 type TaskRepository interface {
-    Add(task domain.Task) error
+    Add(description string) (domain.Task, error)
     GetAll() ([]domain.Task, error)
-    GetByID(id string) (domain.Task, error)
-    Update(task domain.Task) error
-    Delete(id string) error
+    GetByID(id int64) (domain.Task, error)
+    Update(task domain.Task) (domain.Task, error)
+    Delete(id int64) error
 }
 
 func NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository
@@ -1099,7 +1099,7 @@ func IsValidStatus(s Status) bool
 **Public interface:**
 ```go
 func ValidateDescription(desc string) error
-func ValidateID(id string) error
+func ValidateID(id int64) error
 ```
 
 **Internal implementation:**
@@ -1534,11 +1534,11 @@ Validation occurs before any side effects. If input is invalid, no file I/O is p
 **Implementation:**
 ```go
 type TaskRepository interface {
-    Add(task domain.Task) error
+    Add(description string) (domain.Task, error)
     GetAll() ([]domain.Task, error)
-    GetByID(id string) (domain.Task, error)
-    Update(task domain.Task) error
-    Delete(id string) error
+    GetByID(id int64) (domain.Task, error)
+    Update(task domain.Task) (domain.Task, error)
+    Delete(id int64) error
 }
 ```
 
@@ -1697,7 +1697,7 @@ func (m *mockRepo) GetAll() ([]domain.Task, error) {
     return m.tasks, nil
 }
 
-func (m *mockRepo) Add(task domain.Task) error {
+func (m *mockRepo) Add(description string) (domain.Task, error) {
     m.tasks = append(m.tasks, task)
     return nil
 }
