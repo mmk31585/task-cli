@@ -478,33 +478,33 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Implement `FormatTaskJSON(task domain.Task) (string, error)`:
-  - [ ] Use `json.MarshalIndent` with 2-space indent
-  - [ ] Return formatted JSON string
-- [ ] Implement `FormatTasksJSON(tasks []domain.Task) (string, error)`:
-  - [ ] Marshal the entire slice as a JSON array
-- [ ] Implement `FormatTasksTable(tasks []domain.Task) (string, error)`:
-  - [ ] Use `text/tabwriter`
-  - [ ] Columns: ID, Description, Status, Created At, Updated At
-  - [ ] Header row with column names
-  - [ ] Align columns properly
-  - [ ] Handle empty slice (print "No tasks found")
-- [ ] Commit: `feat(formater): add JSON and table output formatters`
+- ✅ Implement `FormatTaskJSON(task domain.Task) (string, error)`:
+  - ✅ Use `json.MarshalIndent` with 2-space indent
+  - ✅ Return formatted JSON string
+- ✅ Implement `FormatTasksJSON(tasks []domain.Task) (string, error)`:
+  - ✅ Marshal the entire slice as a JSON array
+- ✅ Implement `FormatTasksTable(tasks []domain.Task) (string, error)`:
+  - ✅ Use `text/tabwriter`
+  - ✅ Columns: ID, Description, Status, Created At, Updated At
+  - ✅ Header row with column names
+  - ✅ Align columns properly
+  - ✅ Handle empty slice (print "No tasks found")
+- ✅ Commit: `feat(formater): add JSON and table output formatters`
 
 **Testing Checklist:**
 
-- [ ] Test `FormatTaskJSON` produces valid JSON with correct fields
-- [ ] Test `FormatTasksJSON` produces a JSON array
-- [ ] Test `FormatTasksTable` produces a formatted table with headers
-- [ ] Test `FormatTasksTable` with empty slice prints "No tasks found"
-- [ ] Test table format aligns columns correctly (fixed-width test)
-- [ ] Test edge case: single task, many tasks
+- ✅ Test `FormatTaskJSON` produces valid JSON with correct fields
+- ✅ Test `FormatTasksJSON` produces a JSON array
+- ✅ Test `FormatTasksTable` produces a formatted table with headers
+- ✅ Test `FormatTasksTable` with empty slice prints "No tasks found"
+- ✅ Test table format aligns columns correctly (fixed-width test)
+- ✅ Test edge case: single task, many tasks
 
 **Definition of Done:**
 
-- [ ] Both output formats work correctly
-- [ ] Table output uses `text/tabwriter` for alignment
-- [ ] Coverage > 95%
+- ✅ Both output formats work correctly
+- ✅ Table output uses `text/tabwriter` for alignment
+- ✅ Coverage > 95%
 
 ---
 
