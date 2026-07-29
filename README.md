@@ -542,7 +542,7 @@ Before any implementation begins:
   - ✅ Get task by ID
   - ✅ Set status and `UpdatedAt`
   - ✅ Persist via `repo.Update`
-- [ ] Commit: `feat(service): add business logic layer with use cases`
+- ✅ Commit: `feat(service): add business logic layer with use cases`
 
 **Testing Checklist:**
 
@@ -578,73 +578,73 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `Handler` struct with `svc *service.TaskService` field
-- [ ] Write `NewHandler(svc *service.TaskService) *Handler`
-- [ ] Implement `HandleAdd(args []string)`:
-  - [ ] Require exactly 1 argument (description)
-  - [ ] Call `svc.AddTask`
-  - [ ] Format output with `formater.FormatTaskJSON`
-  - [ ] Handle error (print to stderr, exit 1)
-- [ ] Implement `HandleUpdate(args []string)`:
-  - [ ] Require exactly 2 arguments (id, description)
-  - [ ] Call `svc.UpdateTask`
-  - [ ] Output the updated task as JSON
-- [ ] Implement `HandleDelete(args []string)`:
-  - [ ] Require exactly 1 argument (id)
-  - [ ] Call `svc.DeleteTask`
-  - [ ] Output success message `{"deleted": "<id>"}`
-- [ ] Implement `HandleList(args []string, table bool)`:
-  - [ ] Accept 0 or 1 argument (optional status filter)
-  - [ ] Call `svc.ListTasks`
-  - [ ] If `table` flag is set, call `formater.FormatTasksTable`
-  - [ ] Otherwise call `formater.FormatTasksJSON`
-- [ ] Implement `HandleMark(args []string, status domain.Status)`:
-  - [ ] Require exactly 1 argument (id)
-  - [ ] Call `svc.MarkTask`
-  - [ ] Output the updated task as JSON
-- [ ] In `cmd/task-cli/main.go`:
-  - [ ] Parse `os.Args[1]` for the command name
-  - [ ] Wire dependencies: `storage → repository → service → handler`
-  - [ ] Use `flag.FlagSet` per command for `--table`, `--help`
-  - [ ] Implement `help` command / `--help` flag
-  - [ ] Dispatch to the correct handler method
-  - [ ] Set `os.Exit(0)` on success, `os.Exit(1)` on error
-- [ ] Test all commands manually:
-  - [ ] `task-cli add "Test task"` → success
-  - [ ] `task-cli list` → shows tasks
-  - [ ] `task-cli list --table` → table format
-  - [ ] `task-cli list done` → filtered
-  - [ ] `task-cli update <id> "New desc"` → updated
-  - [ ] `task-cli delete <id>` → deleted
-  - [ ] `task-cli mark-in-progress <id>` → status changed
-  - [ ] `task-cli mark-done <id>` → status changed
-  - [ ] `task-cli add ""` → error message
-  - [ ] `task-cli` (no args) → help text
-  - [ ] `task-cli --help` → help text
-  - [ ] `task-cli unknown` → "unknown command" error
-- [ ] Commit: `feat(cli): add CLI handler, command dispatch, and all commands`
+- ✅ Define `Handler` struct with `svc *service.TaskService` field
+- ✅ Write `NewHandler(svc *service.TaskService) *Handler`
+- ✅ Implement `HandleAdd(args []string)`:
+  - ✅ Require exactly 1 argument (description)
+  - ✅ Call `svc.AddTask`
+  - ✅ Format output with `formater.FormatTaskJSON`
+  - ✅ Handle error (print to stderr, exit 1)
+- ✅ Implement `HandleUpdate(args []string)`:
+  - ✅ Require exactly 2 arguments (id, description)
+  - ✅ Call `svc.UpdateTask`
+  - ✅ Output the updated task as JSON
+- ✅ Implement `HandleDelete(args []string)`:
+  - ✅ Require exactly 1 argument (id)
+  - ✅ Call `svc.DeleteTask`
+  - ✅ Output success message `{"deleted": "<id>"}`
+- ✅ Implement `HandleList(args []string, table bool)`:
+  - ✅ Accept 0 or 1 argument (optional status filter)
+  - ✅ Call `svc.ListTasks`
+  - ✅ If `table` flag is set, call `formater.FormatTasksTable`
+  - ✅ Otherwise call `formater.FormatTasksJSON`
+- ✅ Implement `HandleMark(args []string, status domain.Status)`:
+  - ✅ Require exactly 1 argument (id)
+  - ✅ Call `svc.MarkTask`
+  - ✅ Output the updated task as JSON
+- ✅ In `cmd/task-cli/main.go`:
+  - ✅ Parse `os.Args[1]` for the command name
+  - ✅ Wire dependencies: `storage → repository → service → handler`
+  - ✅ Use `flag.FlagSet` per command for `--table`, `--help`
+  - ✅ Implement `help` command / `--help` flag
+  - ✅ Dispatch to the correct handler method
+  - ✅ Set `os.Exit(0)` on success, `os.Exit(1)` on error
+- ✅ Test all commands manually:
+  - ✅ `task-cli add "Test task"` → success
+  - ✅ `task-cli list` → shows tasks
+  - ✅ `task-cli list --table` → table format
+  - ✅ `task-cli list done` → filtered
+  - ✅ `task-cli update <id> "New desc"` → updated
+  - ✅ `task-cli delete <id>` → deleted
+  - ✅ `task-cli mark-in-progress <id>` → status changed
+  - ✅ `task-cli mark-done <id>` → status changed
+  - ✅ `task-cli add ""` → error message
+  - ✅ `task-cli` (no args) → help text
+  - ✅ `task-cli --help` → help text
+  - ✅ `task-cli unknown` → "unknown command" error
+- ✅ Commit: `feat(cli): add CLI handler, command dispatch, and all commands`
 
 **Testing Checklist:**
 
-- [ ] Test `HandleAdd` with correct args outputs JSON to stdout
-- [ ] Test `HandleAdd` with missing args writes error to stderr, exits 1
-- [ ] Test `HandleList` outputs JSON array
-- [ ] Test `HandleList --table` outputs formatted table
-- [ ] Test `HandleList done` outputs only done tasks
-- [ ] Test `HandleUpdate` with correct args outputs updated task
-- [ ] Test `HandleDelete` outputs success JSON
-- [ ] Test `HandleMark` outputs updated task with new status
-- [ ] Test unknown command returns error
-- [ ] Test no command prints help
-- [ ] Test `--help` flag prints help
-- [ ] Test all error paths produce non-zero exit code
+- ✅ Test `HandleAdd` with correct args outputs JSON to stdout
+- ✅ Test `HandleAdd` with missing args writes error to stderr, exits 1
+- ✅ Test `HandleList` outputs JSON array
+- ✅ Test `HandleList --table` outputs formatted table
+- ✅ Test `HandleList done` outputs only done tasks
+- ✅ Test `HandleUpdate` with correct args outputs updated task
+- ✅ Test `HandleDelete` outputs success JSON
+- ✅ Test `HandleMark` outputs updated task with new status
+- ✅ Test unknown command returns error
+- ✅ Test no command prints help
+- ✅ Test `--help` flag prints help
+- ✅ Test all error paths produce non-zero exit code
 
 **Definition of Done:**
 
-- [ ] All 7 commands work correctly from the terminal
-- [ ] Error messages go to stderr, output goes to stdout
-- [ ] Exit codes are correct (0 success, 1 error)
-- [ ] `--help` and `--table` work as documented
+- ✅ All 7 commands work correctly from the terminal
+- ✅ Error messages go to stderr, output goes to stdout
+- ✅ Exit codes are correct (0 success, 1 error)
+- ✅ `--help` and `--table` work as documented
 
 ---
 
