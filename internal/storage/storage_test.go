@@ -34,7 +34,7 @@ func TestStorage(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		raw := `[{"id":1,"description":"test","status":"done","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}]`
+		raw := `[{"id":1,"description":"test","status":"done","created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z"}]`
 		if err := os.WriteFile(s.filePath, []byte(raw), 0644); err != nil {
 			t.Fatal(err)
 		}

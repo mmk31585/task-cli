@@ -12,7 +12,7 @@ A minimalist, production-grade CLI task tracker written in **Go** following **Cl
 - **Delete** tasks
 - **Mark** tasks as `in-progress` / `done`
 - **JSON** output by default with optional human-readable `--table` format
-- **UUIDv7** identifiers (time-ordered, unique)
+- **Auto-increment** integer IDs
 - **No external dependencies** — 100% Go standard library
 
 ---
@@ -123,9 +123,6 @@ task-cli/
 │   │   └── storage.go           # Low-level JSON file read/write + locking
 │   └── validator/
 │       └── validator.go         # Input validation rules
-├── pkg/
-│   └── uuid/
-│       └── uuid.go              # UUIDv7 generator (public, reusable)
 ├── docs/
 │   └── software-design-document.md  # Complete architecture document
 ├── go.mod
@@ -160,8 +157,8 @@ task-cli/
 │  internal/storage  │  internal/validator    │
 │  (JSON File I/O)   │  (Input Validation)   │
 ├─────────────────────────────────────────────┤
-│  internal/formater │  pkg/uuid             │
-│  (Output Display)  │  (UUIDv7 Generator)   │
+│  internal/formater │                       │
+│  (Output Display)  │                       │
 └─────────────────────────────────────────────┘
 ```
 
@@ -247,18 +244,17 @@ MIT
 | 0 | Definition of Ready | — | Pending |
 | 1 | Bootstrap | 15 min | Pending |
 | 2 | Domain | 30 min | Pending |
-| 3 | ID Generation (`pkg/uuid`) | 20 min | Pending |
-| 4 | JSON Storage | 45 min | Pending |
-| 5 | Repository | 30 min | Pending |
-| 6 | Validator | 15 min | Pending |
-| 7 | Formatter | 20 min | Pending |
-| 8 | Service (Business Logic) | 45 min | Pending |
-| 9 | CLI Handler + Commands | 1 hr | Pending |
-| 10 | Error Handling | 30 min | Pending |
-| 11 | Testing | 2 hr | Pending |
-| 12 | Documentation | 1 hr | Pending |
-| 13 | Refactoring & Code Quality | 1 hr | Pending |
-| 14 | Release v1.0.0 | 30 min | Pending |
+| 3 | JSON Storage | 45 min | Pending |
+| 4 | Repository | 30 min | Pending |
+| 5 | Validator | 15 min | Pending |
+| 6 | Formatter | 20 min | Pending |
+| 7 | Service (Business Logic) | 45 min | Pending |
+| 8 | CLI Handler + Commands | 1 hr | Pending |
+| 9 | Error Handling | 30 min | Pending |
+| 10 | Testing | 2 hr | Pending |
+| 11 | Documentation | 1 hr | Pending |
+| 12 | Refactoring & Code Quality | 1 hr | Pending |
+| 13 | Release v1.0.0 | 30 min | Pending |
 
 ---
 
@@ -293,7 +289,7 @@ Before any implementation begins:
 - ✅ Run `go mod init github.com/mmk31585/task-cli`
 - ✅ Create `cmd/task-cli/main.go` with a minimal `func main()` that prints a help message
 - ✅ Create placeholder files in each `internal/` package (one `.go` file per package with `package <name>`)
-- ✅ Create `pkg/uuid/uuid.go` placeholder
+- ✅ Remove `pkg/uuid` (not needed with auto-increment IDs)
 - ✅ Verify `go build ./...` succeeds
 - ✅ Verify `go vet ./...` succeeds
 - ✅ Verify `go test ./...` succeeds (zero tests is OK at this stage)
@@ -372,7 +368,7 @@ Before any implementation begins:
   - ✅ Use `os.Rename` for atomic replacement
   - ✅ Create data directory with `os.MkdirAll` if needed
 - [ ] Ensure all exported functions have Go doc comments
-- [ ] Commit: `feat(storage): add JSON file storage with atomic writes`
+- ✅ Commit: `feat(storage): add JSON file storage with atomic writes`
 
 **Testing Checklist:**
 
@@ -403,38 +399,38 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `TaskRepository` interface with:
-  - [ ] `Add(task domain.Task) error`
-  - [ ] `GetAll() ([]domain.Task, error)`
-  - [ ] `GetByID(id string) (domain.Task, error)`
-  - [ ] `Update(task domain.Task) error`
-  - [ ] `Delete(id string) error`
-- [ ] Define `JSONTaskRepository` struct with `store *storage.JSONStorage` field
-- [ ] Write `NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository`
-- [ ] Implement `Add`: read all, append, write all
-- [ ] Implement `GetAll`: read all, return
-- [ ] Implement `GetByID`: read all, linear scan, return `ErrTaskNotFound` if missing
-- [ ] Implement `Update`: read all, find by ID, replace, write all
-- [ ] Implement `Delete`: read all, filter out by ID, write all
-- [ ] Commit: `feat(repository): add TaskRepository interface and JSON implementation`
+- ✅ Define `TaskRepository` interface with:
+  - ✅ `Add(task domain.Task) error`
+  - ✅ `GetAll() ([]domain.Task, error)`
+  - ✅ `GetByID(id string) (domain.Task, error)`
+  - ✅ `Update(task domain.Task) error`
+  - ✅ `Delete(id string) error`
+- ✅ Define `JSONTaskRepository` struct with `store *storage.JSONStorage` field
+- ✅ Write `NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository`
+- ✅ Implement `Add`: read all, append, write all
+- ✅ Implement `GetAll`: read all, return
+- ✅ Implement `GetByID`: read all, linear scan, return `ErrTaskNotFound` if missing
+- ✅ Implement `Update`: read all, find by ID, replace, write all
+- ✅ Implement `Delete`: read all, filter out by ID, write all
+- ✅ Commit: `feat(repository): add TaskRepository interface and JSON implementation`
 
 **Testing Checklist:**
 
-- [ ] Test `Add` then `GetAll` returns the added task
-- [ ] Test `Add` multiple tasks returns correct count
-- [ ] Test `GetByID` returns correct task by ID
-- [ ] Test `GetByID` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `Update` modifies description
-- [ ] Test `Update` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `Delete` removes task
-- [ ] Test `Delete` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test all operations preserve other tasks (no data loss)
+- ✅ Test `Add` then `GetAll` returns the added task
+- ✅ Test `Add` multiple tasks returns correct count
+- ✅ Test `GetByID` returns correct task by ID
+- ✅ Test `GetByID` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `Update` modifies description
+- ✅ Test `Update` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `Delete` removes task
+- ✅ Test `Delete` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test all operations preserve other tasks (no data loss)
 
 **Definition of Done:**
 
-- [ ] `JSONTaskRepository` satisfies `TaskRepository` interface (checked by Go compiler)
-- [ ] All operations work correctly with a temp file backing store
-- [ ] Coverage > 90%
+- ✅ `JSONTaskRepository` satisfies `TaskRepository` interface (checked by Go compiler)
+- ✅ All operations work correctly with a temp file backing store
+- ✅ Coverage > 90%
 
 ---
 
@@ -526,7 +522,7 @@ Before any implementation begins:
 - [ ] Write `NewTaskService(repo repository.TaskRepository) *TaskService`
 - [ ] Implement `AddTask(description string) (domain.Task, error)`:
   - [ ] Call `validator.ValidateDescription`
-  - [ ] Generate UUIDv7 via `uuid.NewV7()`
+  - [ ] Generate next auto-increment ID via `repo.NextID()`
   - [ ] Create `domain.Task` with status `StatusTodo`, timestamps set to `time.Now()`
   - [ ] Call `repo.Add`
   - [ ] Return the created task
@@ -700,7 +696,7 @@ Before any implementation begins:
 - [ ] Write domain tests: `internal/domain/task_test.go`
   - [ ] Test `IsValidStatus` for all valid and invalid values
   - [ ] Test sentinel error comparisons
-- [ ] Write UUID tests: `pkg/uuid/uuid_test.go`
+- [ ] Write ID generation tests
   - [ ] Test format, uniqueness, time-ordering
 - [ ] Write storage tests: `internal/storage/storage_test.go`
   - [ ] Use `os.CreateTemp` for isolated test directories
@@ -866,7 +862,7 @@ Before any implementation begins:
 | Milestone | Phase | Verification |
 |---|---|---|
 | Domain tests pass | Phase 2 | `go test ./internal/domain/...` |
-| UUID generation works | Phase 3 | `go test ./pkg/uuid/...` |
+| Storage + Repository tests pass | Phase 3 | `go test ./internal/storage/... ./internal/repository/...` |
 | File I/O works (temp files) | Phase 4 | `go test ./internal/storage/...` |
 | CRUD operations correct | Phase 5 | `go test ./internal/repository/...` |
 | Validation rules correct | Phase 6 | `go test ./internal/validator/...` |
@@ -888,8 +884,8 @@ main              ●──────●──────●─────�
                    \    / \    / \    /                 /
 phase/1-bootstrap  ●──●   ●──●   ●──●                 /
 phase/2-domain           ●──●                          /
-phase/3-uuid                 ●──●                      /
-phase/4-storage                 ●──●                  /
+phase/3-storage                 ●──●                  /
+
 ...                                                     /
                                                        /
 release/v1.0.0  ──────────────────────────────────────●
@@ -910,8 +906,7 @@ release/v1.0.0  ─────────────────────�
 |---|---|
 | `phase/1-bootstrap` | Project skeleton |
 | `phase/2-domain` | Domain layer |
-| `phase/3-uuid` | UUID generation |
-| `phase/4-storage` | JSON storage |
+| `phase/3-storage` | JSON storage |
 | `phase/5-repository` | Repository |
 | `phase/6-validator` | Validation |
 | `phase/7-formatter` | Output formatting |
