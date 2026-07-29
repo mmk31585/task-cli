@@ -796,7 +796,7 @@ Before any implementation begins:
 - ✅ All files have a consistent license header (optional)
 - ✅ `go mod verify` passes
 - ✅ `go build -o /dev/null ./cmd/task-cli` succeeds
-- [ ] Commit: `refactor: code quality review and cleanup`
+- ✅ Commit: `refactor: code quality review and cleanup`
 
 **Definition of Done:**
 
