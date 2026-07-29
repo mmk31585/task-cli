@@ -278,16 +278,16 @@ MIT
 
 Before any implementation begins:
 
-- [ ] All ADRs from the Software Design Document are reviewed and accepted
-- [ ] The package directory structure exists (`cmd/`, `internal/*`, `pkg/`)
-- [ ] Go 1.24+ is installed (`go version`)
-- [ ] `go.mod` is initialized with the correct module path
-- [ ] The project builds with zero dependencies (`go build ./...`)
-- [ ] `go vet ./...` passes on an empty project
-- [ ] `gofmt -s .` produces no diffs
-- [ ] All stakeholders agree on the command interface (names, flags, arguments)
-- [ ] The JSON data format is finalized (field names, types, timestamps)
-- [ ] Git branch `main` is ready with an initial commit
+- ✅ All ADRs from the Software Design Document are reviewed and accepted
+- ✅ The package directory structure exists (`cmd/`, `internal/*`, `pkg/`)
+- ✅ Go 1.24+ is installed (`go version`)
+- ✅ `go.mod` is initialized with the correct module path
+- ✅ The project builds with zero dependencies (`go build ./...`)
+- ✅ `go vet ./...` passes on an empty project
+- ✅ `gofmt -s .` produces no diffs
+- ✅ All stakeholders agree on the command interface (names, flags, arguments)
+- ✅ The JSON data format is finalized (field names, types, timestamps)
+- ✅ Git branch `main` is ready with an initial commit
 
 ---
 
