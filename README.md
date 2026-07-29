@@ -38,11 +38,18 @@ A minimalist, production-grade CLI task tracker written in **Go** following **Cl
 git clone https://github.com/mmk31585/task-cli.git
 cd task-cli
 
-# Build
+# Build (produces ./task-cli binary)
 go build -o task-cli ./cmd/task-cli
+# or
+make build
 
-# (Optional) Install to $GOPATH/bin
+# Install globally to $GOPATH/bin (requires ~/go/bin in PATH)
 go install ./cmd/task-cli
+# or
+make install
+
+# Verify
+task-cli --help
 ```
 
 ---
@@ -171,20 +178,29 @@ Higher layers depend on abstractions (interfaces), never on concrete implementat
 ## Development Workflow
 
 ```bash
-# Run directly
+# Run directly (no build needed)
 go run ./cmd/task-cli list
 
-# Run tests
-go test ./...
+# Full quality check (fmt → vet → build → test)
+make all
+
+# Run tests with race detector and coverage
+make test
 
 # Format code
-go fmt ./...
+make fmt
 
 # Vet code
-go vet ./...
+make vet
 
-# Build
-go build -o task-cli ./cmd/task-cli
+# Build binary
+make build
+
+# Install globally
+make install
+
+# Clean artifacts
+make clean
 ```
 
 ---
