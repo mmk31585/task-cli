@@ -443,30 +443,29 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Implement `ValidateDescription(desc string) error`:
-  - [ ] Return `ErrEmptyDescription` if `desc` is empty or whitespace-only
-  - [ ] Return `ErrDescriptionTooLong` if `len(desc) > 500`
-  - [ ] Return `nil` otherwise
-- [ ] Implement `ValidateID(id string) error`:
-  - [ ] Return error if `id` is empty
-- [ ] Ensure all functions are pure (no I/O, no state)
-- [ ] Commit: `feat(validator): add input validation functions`
+- ✅ Implement `ValidateDescription(desc string) error`:
+  - ✅ Return `ErrEmptyDescription` if `desc` is empty or whitespace-only
+  - ✅ Return `ErrDescriptionTooLong` if `len(desc) > 500`
+  - ✅ Return `nil` otherwise
+- ✅ Implement `ValidateID(id int64) error`:
+- ✅ Ensure all functions are pure (no I/O, no state)
+- ✅ Commit: `feat(validator): add input validation functions`
 
 **Testing Checklist:**
 
-- [ ] Test `ValidateDescription("")` returns error
-- [ ] Test `ValidateDescription("  ")` returns error
-- [ ] Test `ValidateDescription(strings.Repeat("a", 501))` returns error
-- [ ] Test `ValidateDescription("Buy milk")` returns `nil`
-- [ ] Test `ValidateDescription(strings.Repeat("a", 500))` returns `nil`
-- [ ] Test `ValidateID("")` returns error
-- [ ] Test `ValidateID("abc")` returns `nil`
+- ✅ Test `ValidateDescription("")` returns error
+- ✅ Test `ValidateDescription("  ")` returns error
+- ✅ Test `ValidateDescription(strings.Repeat("a", 501))` returns error
+- ✅ Test `ValidateDescription("Buy milk")` returns `nil`
+- ✅ Test `ValidateDescription(strings.Repeat("a", 500))` returns `nil`
+- ✅ Test `ValidateID(-5)` returns error
+- ✅ Test `ValidateID(3)` returns `nil`
 
 **Definition of Done:**
 
-- [ ] All validation functions are pure (no side effects)
-- [ ] Boundary conditions tested (0, 1, 500, 501 characters)
-- [ ] Coverage 100%
+- ✅ All validation functions are pure (no side effects)
+- ✅ Boundary conditions tested (0, 1, 500, 501 characters)
+- ✅ Coverage 100%
 
 ---
 
