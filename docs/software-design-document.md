@@ -1071,7 +1071,6 @@ const StatusInProgress Status = "in-progress"
 const StatusDone Status = "done"
 
 var ErrTaskNotFound = errors.New("task not found")
-var ErrInvalidStatus = errors.New("invalid status")
 
 func IsValidStatus(s Status) bool
 ```
@@ -1267,9 +1266,14 @@ The JSON file would remain as an export/import format.
 ```go
 // Domain errors (in internal/domain/errors.go)
 var ErrTaskNotFound = errors.New("task not found")
-var ErrInvalidStatus = errors.New("invalid status")
-var ErrEmptyDescription = errors.New("description cannot be empty")
+
+// Validator errors (in internal/validator/validator.go)
+var ErrEmptyDescription   = errors.New("description cannot be empty")
 var ErrDescriptionTooLong = errors.New("description must not exceed 500 characters")
+var ErrIDIsInvalid        = errors.New("id is invalid")
+
+// Service errors (in internal/service/service.go)
+var ErrStatusInvalid = errors.New("status is not valid")
 
 // Storage errors (in internal/storage/storage.go)
 var ErrCorruptedFile = errors.New("task file is corrupted")
@@ -1320,7 +1324,7 @@ func (h *Handler) run(args []string) {
     task, err := h.service.AddTask(description)
     if err != nil {
         switch {
-        case errors.Is(err, domain.ErrEmptyDescription):
+        case errors.Is(err, validator.ErrEmptyDescription):
             fmt.Fprintln(os.Stderr, "Error: description cannot be empty")
         case errors.Is(err, domain.ErrTaskNotFound):
             fmt.Fprintf(os.Stderr, "Error: task not found\n")
@@ -1698,8 +1702,9 @@ func (m *mockRepo) GetAll() ([]domain.Task, error) {
 }
 
 func (m *mockRepo) Add(description string) (domain.Task, error) {
+    task := domain.Task{ID: int64(len(m.tasks) + 1), Description: description, Status: domain.StatusTodo}
     m.tasks = append(m.tasks, task)
-    return nil
+    return task, nil
 }
 // ... other methods
 ```

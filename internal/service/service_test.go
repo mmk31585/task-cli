@@ -111,8 +111,12 @@ func TestAddTask(t *testing.T) {
 func TestListTasks(t *testing.T) {
 	t.Run("empty status returns all tasks", func(t *testing.T) {
 		svc := NewTaskService(newMockRepo())
-		svc.AddTask("one")
-		svc.AddTask("two")
+		if _, err := svc.AddTask("one"); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := svc.AddTask("two"); err != nil {
+			t.Fatal(err)
+		}
 
 		tasks, err := svc.ListTasks("")
 		if err != nil {
@@ -125,9 +129,16 @@ func TestListTasks(t *testing.T) {
 
 	t.Run("status filter returns matching tasks", func(t *testing.T) {
 		svc := NewTaskService(newMockRepo())
-		svc.AddTask("todo task")
-		doneTask, _ := svc.AddTask("done task")
-		svc.MarkTask(doneTask.ID, domain.StatusDone)
+		if _, err := svc.AddTask("todo task"); err != nil {
+			t.Fatal(err)
+		}
+		doneTask, err := svc.AddTask("done task")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := svc.MarkTask(doneTask.ID, domain.StatusDone); err != nil {
+			t.Fatal(err)
+		}
 
 		tasks, err := svc.ListTasks("done")
 		if err != nil {

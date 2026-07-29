@@ -13,6 +13,13 @@ import (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintln(os.Stderr, "Error: unexpected error — please try again")
+			os.Exit(1)
+		}
+	}()
+
 	if len(os.Args) < 2 {
 		printHelp()
 		os.Exit(1)

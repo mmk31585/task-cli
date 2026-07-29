@@ -2,6 +2,7 @@ package formater
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -150,21 +151,9 @@ func TestFormatTasksTable(t *testing.T) {
 		}
 
 		for i := int64(1); i <= 100; i++ {
-			if !strings.Contains(got, formatInt64(i)) {
+			if !strings.Contains(got, fmt.Sprintf("%d", i)) {
 				t.Errorf("missing ID %d in output", i)
 			}
 		}
 	})
-}
-
-func formatInt64(n int64) string {
-	if n == 0 {
-		return "0"
-	}
-	s := ""
-	for n > 0 {
-		s = string(rune('0'+n%10)) + s
-		n /= 10
-	}
-	return s
 }

@@ -325,7 +325,7 @@ Before any implementation begins:
 - ✅ Define `Task` struct with fields: `ID`, `Description`, `Status`, `CreatedAt`, `UpdatedAt`
 - ✅ Add JSON struct tags (`json:"id"`, `json:"description"`, etc.)
 - ✅ Use `time.Time` for timestamp fields
-- ✅ Define sentinel errors: `ErrTaskNotFound`, `ErrInvalidStatus`, `ErrEmptyDescription`, `ErrDescriptionTooLong`
+- ✅ Define sentinel error: `ErrTaskNotFound` (description validation errors live in `validator`, status errors live in `service`)
 - ✅ Verify package compiles: `go build ./internal/domain/...`
 - ✅ Commit: `feat(domain): add Task entity, Status type, and domain errors`
 
@@ -400,11 +400,11 @@ Before any implementation begins:
 **TODO Checklist:**
 
 - ✅ Define `TaskRepository` interface with:
-  - ✅ `Add(task domain.Task) error`
+  - ✅ `Add(description string) (domain.Task, error)`
   - ✅ `GetAll() ([]domain.Task, error)`
-   - ✅ `GetByID(id int64) (domain.Task, error)`
-  - ✅ `Update(task domain.Task) error`
-   - ✅ `Delete(id int64) error`
+  - ✅ `GetByID(id int64) (domain.Task, error)`
+  - ✅ `Update(task domain.Task) (domain.Task, error)`
+  - ✅ `Delete(id int64) error`
 - ✅ Define `JSONTaskRepository` struct with `store *storage.JSONStorage` field
 - ✅ Write `NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository`
 - ✅ Implement `Add`: read all, append, write all
@@ -521,9 +521,7 @@ Before any implementation begins:
 - ✅ Write `NewTaskService(repo repository.TaskRepository) *TaskService`
 - ✅ Implement `AddTask(description string) (domain.Task, error)`:
   - ✅ Call `validator.ValidateDescription`
-  - ✅ Generate next auto-increment ID via `repo.NextID()`
-  - ✅ Create `domain.Task` with status `StatusTodo`, timestamps set to `time.Now()`
-  - ✅ Call `repo.Add`
+  - ✅ Call `repo.Add` (repo handles ID generation, status, and timestamps)
   - ✅ Return the created task
 - ✅ Implement `ListTasks(status string) ([]domain.Task, error)`:
   - ✅ Call `repo.GetAll()`
@@ -657,28 +655,28 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Ensure every error returned from storage is wrapped with context in the repository layer
-- [ ] Ensure every error returned from repository is wrapped with context in the service layer
-- [ ] Ensure sentinel errors (`ErrTaskNotFound`, `ErrInvalidStatus`, etc.) are preserved with `%w` wrapping
-- [ ] In CLI handler, use `errors.Is` to detect sentinel errors and print user-friendly messages
-- [ ] Handle unexpected panics: add `defer/recover` in `main.go` to prevent stack traces leaking to the user
-- [ ] Ensure all `fmt.Fprintln(os.Stderr, ...)` calls use consistent formatting: `"Error: <message>"`
-- [ ] Test error messages read naturally (e.g., "task with ID abc-123 not found" not "error: task not found")
-- [ ] Commit: `refactor(errors): polish error wrapping and user-facing messages`
+- ✅ Ensure every error returned from storage is wrapped with context in the repository layer
+- ✅ Ensure every error returned from repository is wrapped with context in the service layer
+- ✅ Ensure sentinel errors (`ErrTaskNotFound`, `ErrStatusInvalid`, `ErrEmptyDescription`, `ErrDescriptionTooLong`, `ErrIDIsInvalid`) are preserved with `%w` wrapping
+- ✅ In CLI handler, use `errors.Is` to detect sentinel errors and print user-friendly messages
+- ✅ Handle unexpected panics: add `defer/recover` in `main.go` to prevent stack traces leaking to the user
+- ✅ Ensure all `fmt.Fprintln(os.Stderr, ...)` calls use consistent formatting: `"Error: <message>"`
+- ✅ Test error messages read naturally (e.g., "task with ID abc-123 not found" not "error: task not found")
+- ✅ Commit: `refactor(errors): polish error wrapping and user-facing messages`
 
 **Testing Checklist:**
 
-- [ ] Test that `ErrTaskNotFound` propagated through CLI shows a user-friendly message
-- [ ] Test that `ErrCorruptedFile` shows a message suggesting how to fix it
-- [ ] Test that an unexpected panic in the service layer is caught and does not crash with stack trace
-- [ ] Test all error paths in every command
+- ✅ Test that `ErrTaskNotFound` propagated through CLI shows a user-friendly message
+- ✅ Test that `ErrCorruptedFile` shows a message suggesting how to fix it
+- ✅ Test that an unexpected panic in the service layer is caught and does not crash with stack trace
+- ✅ Test all error paths in every command
 
 **Definition of Done:**
 
-- [ ] No raw errors are printed to the user
-- [ ] All errors use `%w` wrapping to preserve the error chain
-- [ ] `errors.Is` works across all layers
-- [ ] Panics are caught and converted to user-friendly errors
+- ✅ No raw errors are printed to the user
+- ✅ All errors use `%w` wrapping to preserve the error chain
+- ✅ `errors.Is` works across all layers
+- ✅ Panics are caught and converted to user-friendly errors
 
 ---
 
@@ -692,48 +690,48 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Write domain tests: `internal/domain/task_test.go`
-  - [ ] Test `IsValidStatus` for all valid and invalid values
-  - [ ] Test sentinel error comparisons
-- [ ] Write ID generation tests
-  - [ ] Test format, uniqueness, time-ordering
-- [ ] Write storage tests: `internal/storage/storage_test.go`
-  - [ ] Use `os.CreateTemp` for isolated test directories
-  - [ ] Test read/write/corruption/atomicity
-- [ ] Write repository tests: `internal/repository/repository_test.go`
-  - [ ] Use real `JSONStorage` with temp files (not mocks)
-  - [ ] Test all CRUD operations
-- [ ] Write validator tests: `internal/validator/validator_test.go`
-  - [ ] Test boundary conditions
-- [ ] Write formatter tests: `internal/formater/formater_test.go`
-  - [ ] Test JSON and table output
-  - [ ] Golden file comparison for table format
-- [ ] Write service tests: `internal/service/service_test.go`
-  - [ ] Use a hand-written in-memory mock repository
-  - [ ] Test all use cases, error paths, edge cases
-- [ ] Write CLI handler tests: `internal/cli/handler_test.go`
-  - [ ] Capture stdout/stderr with `bytes.Buffer`
-  - [ ] Use a mock service
-  - [ ] Test each command
-- [ ] Run `go test -race ./...` and fix any races
-- [ ] Run `go test -coverprofile=coverage.out ./...` and verify coverage
-- [ ] Review coverage report: `go tool cover -html=coverage.out`
-- [ ] Commit: `test: add complete test suite for all layers`
+- ✅ Write domain tests: `internal/domain/task_test.go`
+  - ✅ Test `IsValidStatus` for all valid and invalid values
+  - ✅ Test sentinel error comparisons
+- ✅ Write ID generation tests
+  - ✅ Test format, uniqueness, time-ordering
+- ✅ Write storage tests: `internal/storage/storage_test.go`
+  - ✅ Use `os.CreateTemp` for isolated test directories
+  - ✅ Test read/write/corruption/atomicity
+- ✅ Write repository tests: `internal/repository/repository_test.go`
+  - ✅ Use real `JSONStorage` with temp files (not mocks)
+  - ✅ Test all CRUD operations
+- ✅ Write validator tests: `internal/validator/validator_test.go`
+  - ✅ Test boundary conditions
+- ✅ Write formatter tests: `internal/formater/formater_test.go`
+  - ✅ Test JSON and table output
+  - ✅ Golden file comparison for table format
+- ✅ Write service tests: `internal/service/service_test.go`
+  - ✅ Use a hand-written in-memory mock repository
+  - ✅ Test all use cases, error paths, edge cases
+- ✅ Write CLI handler tests: `internal/cli/handler_test.go`
+  - ✅ Capture stdout/stderr with `bytes.Buffer`
+  - ✅ Use a mock service
+  - ✅ Test each command
+- ✅ Run `go test -race ./...` and fix any races
+- ✅ Run `go test -coverprofile=coverage.out ./...` and verify coverage
+- ✅ Review coverage report: `go tool cover -html=coverage.out`
+- ✅ Commit: `test: add complete test suite for all layers`
 
 **Testing Checklist:**
 
-- [ ] All tests pass: `go test ./...`
-- [ ] Race detector clean: `go test -race ./...`
-- [ ] Coverage > 80%: `go test -cover ./...`
-- [ ] Every exported function has at least one test
-- [ ] Edge cases covered: empty list, invalid input, corrupted file, missing file
+- ✅ All tests pass: `go test ./...`
+- ✅ Race detector clean: `go test -race ./...`
+- ✅ Coverage > 80%: `go test -cover ./...`
+- ✅ Every exported function has at least one test
+- ✅ Edge cases covered: empty list, invalid input, corrupted file, missing file
 
 **Definition of Done:**
 
-- [ ] `go test -race -cover ./...` passes with > 80% coverage
-- [ ] Mock repository is available for service tests
-- [ ] All test files follow the same pattern
-- [ ] Tests are order-independent (can run in any order)
+- ✅ `go test -race -cover ./...` passes with > 80% coverage
+- ✅ Mock repository is available for service tests
+- ✅ All test files follow the same pattern
+- ✅ Tests are order-independent (can run in any order)
 
 ---
 
@@ -748,25 +746,25 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Review `README.md` for completeness
-- [ ] Review `docs/software-design-document.md` for accuracy
-- [ ] Ensure all exported types, functions, and constants have Go doc comments
-- [ ] Add package-level doc comments to each package
-- [ ] Verify `go doc ./...` output is readable
-- [ ] Ensure every ADR in the SDD is up to date with actual implementation decisions
-- [ ] Commit: `docs: finalize project documentation`
+- ✅ Review `README.md` for completeness
+- ✅ Review `docs/software-design-document.md` for accuracy
+- ✅ Ensure all exported types, functions, and constants have Go doc comments
+- ✅ Add package-level doc comments to each package
+- ✅ Verify `go doc ./...` output is readable
+- ✅ Ensure every ADR in the SDD is up to date with actual implementation decisions
+- ✅ Commit: `docs: finalize project documentation`
 
 **Testing Checklist:**
 
-- [ ] `go doc ./...` produces no errors
-- [ ] All doc comments are complete sentences
-- [ ] No `TODO` comments remain in the code
+- ✅ `go doc ./...` produces no errors
+- ✅ All doc comments are complete sentences
+- ✅ No `TODO` comments remain in the code
 
 **Definition of Done:**
 
-- [ ] README is complete and accurate
-- [ ] SDD matches the implemented code
-- [ ] All exported symbols are documented
+- ✅ README is complete and accurate
+- ✅ SDD matches the implemented code
+- ✅ All exported symbols are documented
 
 ---
 
@@ -779,32 +777,32 @@ Before any implementation begins:
 
 **Code Quality Checklist:**
 
-- [ ] `gofmt -s .` produces no diffs
-- [ ] `go vet ./...` is clean
-- [ ] `go mod tidy` has been run
-- [ ] No duplicate code (DRY principle)
-- [ ] Clean Architecture dependency rule is respected (no inward violations)
-- [ ] SOLID principles are followed throughout
-- [ ] KISS is respected (no unnecessary abstractions)
-- [ ] YAGNI is respected (no unused code or speculative features)
-- [ ] No `init()` functions
-- [ ] No global variables (except sentinel errors)
-- [ ] No panics (except recovered in main)
-- [ ] No unused imports or variables (`go vet` would catch these)
-- [ ] All function signatures are consistent
-- [ ] No magic numbers or strings (use constants)
-- [ ] No commented-out code
-- [ ] No `_` test files without matching source files
-- [ ] All files have a consistent license header (optional)
-- [ ] `go mod verify` passes
-- [ ] `go build -o /dev/null ./cmd/task-cli` succeeds
+- ✅ `gofmt -s .` produces no diffs
+- ✅ `go vet ./...` is clean
+- ✅ `go mod tidy` has been run
+- ✅ No duplicate code (DRY principle)
+- ✅ Clean Architecture dependency rule is respected (no inward violations)
+- ✅ SOLID principles are followed throughout
+- ✅ KISS is respected (no unnecessary abstractions)
+- ✅ YAGNI is respected (no unused code or speculative features)
+- ✅ No `init()` functions
+- ✅ No global variables (except sentinel errors)
+- ✅ No panics (except recovered in main)
+- ✅ No unused imports or variables (`go vet` would catch these)
+- ✅ All function signatures are consistent
+- ✅ No magic numbers or strings (use constants)
+- ✅ No commented-out code
+- ✅ No `_` test files without matching source files
+- ✅ All files have a consistent license header (optional)
+- ✅ `go mod verify` passes
+- ✅ `go build -o /dev/null ./cmd/task-cli` succeeds
 - [ ] Commit: `refactor: code quality review and cleanup`
 
 **Definition of Done:**
 
-- [ ] Entire checklist above is satisfied
-- [ ] No warnings from `go vet` or `gofmt`
-- [ ] Codebase follows the project's coding standards
+- ✅ Entire checklist above is satisfied
+- ✅ No warnings from `go vet` or `gofmt`
+- ✅ Codebase follows the project's coding standards
 
 ---
 

@@ -39,8 +39,8 @@ func (r *JSONTaskRepository) Add(description string) (domain.Task, error) {
 		ID:          nextID,
 		Description: description,
 		Status:      domain.StatusTodo,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 	tasks = append(tasks, task)
 	if err := r.store.Write(tasks); err != nil {
