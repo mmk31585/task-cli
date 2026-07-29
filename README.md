@@ -832,41 +832,41 @@ Before any implementation begins:
 
 **Release Checklist:**
 
-- [ ] All previous phases are complete and committed
-- [ ] `main` branch is up to date
-- [ ] `go build -o task-cli ./cmd/task-cli` produces a working binary
-- [ ] Final manual smoke test of all commands:
-  - [ ] `task-cli add "Smoke test"` → creates task
-  - [ ] `task-cli list` → shows task
-  - [ ] `task-cli list --table` → table format OK
-  - [ ] `task-cli update <id> "Updated"` → updates
-  - [ ] `task-cli mark-in-progress <id>` → status changes
-  - [ ] `task-cli mark-done <id>` → status changes
-  - [ ] `task-cli list done` → filter works
-  - [ ] `task-cli list todo` → filter works
-  - [ ] `task-cli delete <id>` → deletes
-  - [ ] `task-cli list` → empty list
-  - [ ] `task-cli add ""` → error shown
-  - [ ] `task-cli --help` → help shown
-- [ ] `go test -race -cover ./...` passes
-- [ ] Create and push tag:
+- ✅ All previous phases are complete and committed
+- ✅ `main` branch is up to date
+- ✅ `go build -o task-cli ./cmd/task-cli` produces a working binary
+- ✅ Final manual smoke test of all commands:
+  - ✅ `task-cli add "Smoke test"` → creates task
+  - ✅ `task-cli list` → shows task
+  - ✅ `task-cli list --table` → table format OK
+  - ✅ `task-cli update <id> "Updated"` → updates
+  - ✅ `task-cli mark-in-progress <id>` → status changes
+  - ✅ `task-cli mark-done <id>` → status changes
+  - ✅ `task-cli list done` → filter works
+  - ✅ `task-cli list todo` → filter works
+  - ✅ `task-cli delete <id>` → deletes
+  - ✅ `task-cli list` → empty list
+  - ✅ `task-cli add ""` → error shown
+  - ✅ `task-cli --help` → help shown
+- ✅ `go test -race -cover ./...` passes
+- ✅ Create and push tag:
   ```bash
   git tag -a v1.0.0 -m "v1.0.0: Initial stable release"
   git push origin v1.0.0
   ```
-- [ ] Write release notes summarizing features
+- ✅ Write release notes summarizing features
 
 **Definition of Done (Project):**
 
-- [ ] All functional requirements (FR-01 through FR-12) are implemented
-- [ ] All non-functional requirements (NFR-01 through NFR-07) are satisfied
-- [ ] Zero external dependencies
-- [ ] Binary compiles as a single static executable
-- [ ] Test coverage exceeds 80%
-- [ ] All code quality checks pass
-- [ ] Documentation is complete and accurate
-- [ ] Git tag `v1.0.0` is published
-- [ ] Project is ready for public consumption
+- ✅ All functional requirements (FR-01 through FR-12) are implemented
+- ✅ All non-functional requirements (NFR-01 through NFR-07) are satisfied
+- ✅ Zero external dependencies
+- ✅ Binary compiles as a single static executable
+- ✅ Test coverage exceeds 80%
+- ✅ All code quality checks pass
+- ✅ Documentation is complete and accurate
+- ✅ Git tag `v1.0.0` is published
+- ✅ Project is ready for public consumption
 
 ---
 
