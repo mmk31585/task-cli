@@ -13,7 +13,7 @@ import (
 
 const fileName = "tasks.json"
 
-var ErrCorruptedFile = errors.New("fail to unmarshal the json file")
+var ErrCorruptedFile = errors.New("failed to unmarshal the JSON file")
 
 type JSONStorage struct {
 	filePath string
@@ -64,6 +64,7 @@ func (s *JSONStorage) Write(tasks []domain.Task) error {
 		return fmt.Errorf("write temp file: %w", err)
 	}
 	if err := os.Rename(tmpPath, s.filePath); err != nil {
+		os.Remove(tmpPath)
 		return fmt.Errorf("rename temp file: %w", err)
 	}
 	return nil

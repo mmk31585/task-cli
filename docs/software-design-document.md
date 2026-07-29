@@ -117,7 +117,7 @@ Most task-tracking tools are either overly complex (Jira, Notion), require a GUI
 
 | Constraint | Rationale |
 |---|---|
-| Must use Go 1.24+ | UUIDv7 generation uses `crypto/rand` API available in Go 1.24+ |
+| Must use Go 1.21+ | Uses standard library features for file I/O, JSON, and CLI |
 | No external modules | Keep the build simple and dependency-free |
 | Storage is a single JSON file | Simplest possible persistence that survives reboots |
 | Must run without network access | Offline-first |
@@ -182,7 +182,7 @@ Scenario: Invalid status transition
 | **Trade-offs** | Go compiles to a single static binary with no runtime dependency. |
 | **Consequences** | Faster startup than Python/Node. Slightly more verbose than Python but faster. |
 
-**Rationale:** Go produces a small, statically-linked binary that runs everywhere. It has a built-in testing tool, formatting standard (`gofmt`), and concurrency primitives if needed later. Its standard library includes everything we need: file I/O, JSON encoding, CLI flags, and even UUID generation (Go 1.24+). This makes it the ideal language for a zero-dependency CLI tool.
+**Rationale:** Go produces a small, statically-linked binary that runs everywhere. It has a built-in testing tool, formatting standard (`gofmt`), and concurrency primitives if needed later. Its standard library includes everything we need: file I/O, JSON encoding, CLI flags, and text formatting. This makes it the ideal language for a zero-dependency CLI tool.
 
 ---
 
@@ -224,7 +224,7 @@ Scenario: Invalid status transition
 | **Trade-offs** | More manual code for CLI parsing. No dependency-vuln surface. Build is always reproducible. |
 | **Consequences** | `go build` works immediately with no `go mod download` step. Binary is self-contained. |
 
-**Rationale:** The Go standard library provides everything needed: `flag` for CLI parsing, `encoding/json` for serialization, `crypto/rand` for UUID generation, `text/tabwriter` for table formatting. Adding external libraries would add risk (supply chain), bloat, and maintenance burden with no meaningful benefit for this scope.
+**Rationale:** The Go standard library provides everything needed: `flag` for CLI parsing, `encoding/json` for serialization, `text/tabwriter` for table formatting, and `os` for file I/O. Adding external libraries would add risk (supply chain), bloat, and maintenance burden with no meaningful benefit for this scope.
 
 ---
 
@@ -284,17 +284,17 @@ Scenario: Invalid status transition
 
 ---
 
-### ADR-009: Why UUIDv7 (Not Auto-increment or Nano-timestamp)
+### ADR-009: Why Auto-increment Integer IDs (Not UUID)
 
 | Field | Value |
 |---|---|
 | **Problem** | Choose the task ID generation strategy. |
-| **Alternatives** | Auto-increment counter in JSON, nano-timestamp, UUIDv4 |
-| **Decision** | UUIDv7 |
-| **Trade-offs** | Slightly more complex code. No sequential numbers. |
-| **Consequences** | IDs are globally unique, time-ordered, and require no coordination. |
+| **Alternatives** | UUIDv4, UUIDv7, nano-timestamp, random string |
+| **Decision** | Auto-increment integer |
+| **Trade-offs** | Sequential, easy to type. Requires coordination (max+1) on every write. |
+| **Consequences** | IDs start at 1 and increment. Users can type IDs directly in CLI commands. |
 
-**Rationale:** UUIDv7 encodes a Unix millisecond timestamp in the first 48 bits and random data in the remaining bits. This gives globally unique, time-sortable IDs without a central counter. The standard library's `crypto/rand` (Go 1.24+) provides the necessary primitives. IDs like `018c4f3a-7e2c-7b00-8000-000000000001` are standard, parseable, and sortable.
+**Rationale:** Auto-increment integer IDs are the simplest for a CLI tool. Users type `task-cli update 1 "new desc"` instead of `task-cli update 018c4f3a-...`. The repository computes `max(ID) + 1` on every add. For a single-user CLI with < 10,000 tasks, performance is negligible. The ID is an implementation detail of the repository layer — other layers never generate IDs.
 
 ---
 
@@ -396,7 +396,6 @@ The system uses a **Layered Architecture** with strict dependency rules. Each la
 | `internal/domain` | Entities, value objects, domain errors. No imports from other project packages. |
 | `internal/validator` | Input validation functions. |
 | `internal/formater` | Output formatting (JSON, table). |
-| `pkg/uuid` | UUIDv7 generation. Public package for potential reuse. |
 
 ### 4.2 Architecture Principles
 
@@ -418,7 +417,6 @@ The system uses a **Layered Architecture** with strict dependency rules. Each la
 | `internal/domain` | Define `Task`, `Status` types, validation rules, state transitions |
 | `internal/validator` | Pure functions for string validation, ID validation |
 | `internal/formater` | Convert `[]Task` to JSON string or formatted table |
-| `pkg/uuid` | Generate UUIDv7 identifiers |
 
 ### 4.4 Dependency Flow
 
@@ -463,7 +461,7 @@ Concerns are separated by package boundary:
 | User interaction | `cli` |
 | Output rendering | `formater` |
 | Input validation | `validator` |
-| ID generation | `pkg/uuid` |
+| ID generation | `repository` (auto-increment) |
 
 ---
 
@@ -553,7 +551,7 @@ A task begins life in `todo` status. The user can advance it through the pipelin
 |---|---|
 | Task | A unit of work with a description and status |
 | Status | The current state of a task in its lifecycle |
-| ID | A UUIDv7 string that uniquely identifies a task |
+| ID | An auto-increment integer that uniquely identifies a task |
 | Todo | Initial status — task is pending |
 | In-Progress | Task is actively being worked on |
 | Done | Task is complete |
@@ -669,7 +667,7 @@ sequenceDiagram
     User->>CLI: task-cli add "Buy milk"
     CLI->>Svc: AddTask("Buy milk")
     Svc->>Svc: Validate("Buy milk")
-    Svc->>Svc: Generate UUIDv7
+    Svc->>Svc: Validate description
     Svc->>Svc: Create Task{todo}
     Svc->>Repo: Add(task)
     Repo->>Store: Read()
@@ -699,7 +697,7 @@ graph TD
     Start([User runs add command]) --> Parse[Parse args]
     Parse --> Check{Description empty?}
     Check -->|Yes| Error[Show error: description required]
-    Check -->|No| Generate[Generate UUIDv7]
+    Check -->|No| Generate[Repository assigns next ID]
     Generate --> Create[Create Task object]
     Create --> Read[Read existing tasks from file]
     Read --> Append[Append new task]
@@ -742,10 +740,6 @@ graph TD
     subgraph "internal/formater"
         fmt[formater.go]
     end
-    subgraph "pkg/uuid"
-        uuid[uuid.go]
-    end
-
     main --> handler
     handler --> svc
     handler --> fmt
@@ -756,7 +750,6 @@ graph TD
     repo --> store
     repo --> task
     store --> task
-    uuid -.-> svc
 ```
 
 **Explanation:** Component diagram showing all packages and their dependencies. The domain layer has no arrows pointing to it — it is dependency-free.
@@ -779,10 +772,6 @@ graph TD
         validator
         formater
     end
-    subgraph "pkg"
-        uuid
-    end
-
     taskcli --> cli
     cli --> service
     cli --> formater
@@ -794,7 +783,7 @@ graph TD
     storage --> domain
 ```
 
-**Explanation:** The `internal` package is the heart of the application. Everything under `internal/` is private to the module. Only `pkg/uuid` is public for potential external consumption.
+**Explanation:** The `internal` package is the heart of the application. Everything under `internal/` is private to the module.
 
 ---
 
@@ -850,7 +839,6 @@ graph TD
     storage --> domain
     cli --> formater[formater]
     formater --> domain
-    service --> uuid[pkg/uuid]
 ```
 
 **Explanation:** This diagram shows the actual Go import dependencies. Arrows point from importer to imported package. Note that `domain` has no outgoing arrows — it is the innermost layer.
@@ -886,9 +874,6 @@ graph TD
             status[Status Enum]
             domainErrors[Domain Errors]
         end
-        subgraph "Shared"
-            uuid[UUIDv7]
-        end
     end
     subgraph "External"
         fs[File System]
@@ -904,7 +889,6 @@ graph TD
     repo <|.. jsonRepo
     jsonRepo --> storage
     storage --> fs
-    service --> uuid
 ```
 
 **Explanation:** This is the full architectural view, showing how the user interacts with the system, how layers are organized, and how data flows to the file system.
@@ -993,12 +977,11 @@ func (s *TaskService) MarkTask(id string, status domain.Status) (domain.Task, er
 
 **Internal implementation:**
 - Calls `validator` for input validation.
-- Calls `pkg/uuid` for ID generation.
-- Calls `repository.TaskRepository` methods for persistence.
+- Calls `repository.TaskRepository` methods for persistence (repository handles ID generation).
 - Sets `CreatedAt` and `UpdatedAt` timestamps.
 - No knowledge of JSON, files, or CLI.
 
-**Dependencies:** `internal/repository` (interface), `internal/domain`, `internal/validator`, `pkg/uuid`.
+**Dependencies:** `internal/repository` (interface), `internal/domain`, `internal/validator`.
 
 **Why a separate package?** This is the heart of the application. By isolating business logic, we can test it without any I/O (by mocking the repository). Any interface (CLI, REST, TUI) would use this same service.
 
@@ -1156,30 +1139,17 @@ func FormatTasksTable(tasks []domain.Task) (string, error)
 
 ---
 
-### 7.9 `pkg/uuid`
+### 7.9 ID Generation
 
-**Purpose:** UUIDv7 generation.
+ID generation is handled internally by the repository layer — there is no separate package for it.
 
-**Responsibilities:**
-- Generate time-ordered UUIDv7 identifiers.
-- Format as standard UUID string (`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
+**Strategy:** Auto-increment integer.
 
-**Public interface:**
-```go
-func NewV7() (string, error)
-```
+The repository computes the next ID as `max(existing task IDs) + 1`. For an empty list, the first ID is 1.
 
-**Internal implementation:**
-- Encodes current Unix timestamp (milliseconds) in the first 6 bytes.
-- Uses `crypto/rand` for the remaining 10 random bytes.
-- Sets the UUID version (7) and variant bits.
-- Formats as a standard UUID hex string.
+**Where it lives:** `JSONTaskRepository.Add()` reads all existing tasks, computes the next ID, assigns it to the new task, and writes back.
 
-**Dependencies:** None (only standard library).
-
-**Why a separate package?** Unlike `internal/`, `pkg/` is importable by external consumers. UUID generation is a general-purpose utility that could be reused. Also, making it public signals that this API is stable.
-
-**Note on Go 1.24+ UUID support:** While Go 1.24+ provides `crypto/rand.UUID()` for generating random UUIDs (v4), UUIDv7 requires specific time-ordered encoding. We implement this manually using `crypto/rand` for randomness and `time` for the timestamp.
+**Why not a separate package?** Auto-increment is a simple `O(n)` scan that fits in a few lines. A separate package would be over-engineering (KISS/YAGNI).
 
 ---
 
@@ -1192,14 +1162,14 @@ The entire task collection is stored in a single JSON array:
 ```json
 [
     {
-        "id": "018c4f3a-7e2c-7b00-8000-000000000001",
+        "id": 1,
         "description": "Buy groceries",
         "status": "todo",
         "created_at": "2026-07-27T10:30:00Z",
         "updated_at": "2026-07-27T10:30:00Z"
     },
     {
-        "id": "018c4f3a-7e2c-7b00-8000-000000000002",
+        "id": 2,
         "description": "Write documentation",
         "status": "in-progress",
         "created_at": "2026-07-27T11:00:00Z",
@@ -1238,28 +1208,17 @@ The data directory is resolved in the following order:
 
 ### 8.5 ID Generation Strategy
 
-**UUIDv7** is used for task IDs. The format:
+**Auto-increment integers** are used for task IDs.
 
-```
-TTTTTTTTTTTTTTTT-VVVV-7VVV-BVVV-VVVVVVVVVVVV
-│         │      │     │     │
-│         │      │     │     └── random (6 bytes)
-│         │      │     └──────── variant (2 bits)
-│         │      └────────────── version (4 bits = 7)
-│         └───────────────────── random (2 bytes)
-└─────────────────────────────── timestamp (6 bytes, ms precision)
-```
+**Format:** Simple sequential integers starting at 1.
 
-- 48 bits: Unix timestamp in milliseconds.
-- 4 bits: UUID version (7).
-- 2 bits: UUID variant (RFC 4122).
-- Remaining: cryptographically random bits.
+**Generation:** On every `Add` call, the repository scans all existing tasks, finds the maximum `ID` value, and assigns `max + 1`. For an empty task list, the first ID is 1.
 
 **Properties:**
-- Time-ordered: IDs sort chronologically.
-- Globally unique: 122 random bits ensure uniqueness.
-- No coordination: Works offline without a central ID server.
-- Standard format: Can be parsed by any UUID library.
+- Sequential: IDs are short, readable integers (1, 2, 3, ...).
+- Easy to type: Users reference tasks by number in CLI commands.
+- Order-preserving: Higher IDs were created later.
+- Scope: Unique within a single data file (single-user).
 
 ### 8.6 Timestamp Strategy
 
@@ -1546,7 +1505,7 @@ Validation occurs before any side effects. If input is invalid, no file I/O is p
 - `JSONStorage.Read()` handles missing files gracefully (returns empty slice).
 - `JSONStorage.Write()` uses atomic writes.
 - All public functions check their inputs.
-- `pkg/uuid.NewV7()` returns an error if `crypto/rand` fails (defensive about entropy).
+- ID generation via the repository defends against max-ID overflow (defensive about edge cases).
 
 ### 11.12 Clean Code
 
@@ -1754,7 +1713,8 @@ No mocking framework is needed. Hand-written mocks are sufficient for this scope
 - Concurrent reads/writes (single test with goroutines, if desired).
 - Extremely long description (500 chars boundary).
 - Status filter with invalid status string.
-- ID with special characters (should not happen with UUIDv7, but test defensive code).
+- ID generation handles empty list correctly (first ID = 1).
+- ID uniqueness: no duplicate IDs after deletes/re-adds.
 - File permission errors (read-only directory).
 - Corrupt JSON file.
 
@@ -1769,7 +1729,7 @@ No mocking framework is needed. Hand-written mocks are sufficient for this scope
 | `service` | 90% |
 | `cli` | 85% |
 | `formater` | 95% |
-| `pkg/uuid` | 95% |
+| ID generation (in repository) | 95% |
 
 ### 13.7 Test Commands
 
@@ -1921,7 +1881,7 @@ git push origin v1.0.0
 **Go doc example:**
 ```go
 // AddTask creates a new task with the given description.
-// It validates the input, generates a UUIDv7 ID, and persists
+// It validates the input, assigns an auto-increment ID, and persists
 // the task via the repository.
 func (s *TaskService) AddTask(description string) (domain.Task, error) {
 ```
