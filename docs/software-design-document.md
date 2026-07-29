@@ -124,10 +124,9 @@ Most task-tracking tools are either overly complex (Jira, Notion), require a GUI
 
 ### 2.4 Assumptions
 
-- The user has a single machine; no concurrent access from multiple processes.
+- The user has a single machine; concurrent access from multiple processes is protected by file locking.
 - The local file system is writable in the data directory.
 - File size stays under ~10 MB (reasonable for personal task tracking).
-- The user runs one instance at a time (no process-level locking needed).
 
 ### 2.5 Business Rules
 
@@ -207,7 +206,7 @@ Scenario: Invalid status transition
 | **Problem** | Choose the persistence mechanism. |
 | **Alternatives** | PostgreSQL, SQLite, BoltDB, CSV, YAML |
 | **Decision** | JSON file |
-| **Trade-offs** | No query capabilities, no concurrent access, no indexing. Simple to inspect and edit manually. |
+| **Trade-offs** | No query capabilities, no indexing. Simple to inspect and edit manually. |
 | **Consequences** | No database setup, no daemon process. Entire data store is a single human-readable file. |
 
 **Rationale:** For a single-user CLI with hundreds (not millions) of tasks, a JSON file is sufficient. It avoids the complexity of embedding SQLite (CGo) or running a database server. JSON's structure maps naturally to Go's `struct`. The trade-off is worth the simplicity gain.
@@ -1394,7 +1393,7 @@ While Task Tracker CLI is a single-user, offline tool, several security consider
 - The entire task slice is the unit of consistency.
 - All mutations read, modify, and write the full slice.
 - Partial writes are prevented by atomic file operations.
-- No concurrent access protection (not needed for single-user).
+- Cross-process concurrent access is protected by file locking (`flock` on Unix, `LockFileEx` on Windows).
 
 ### 10.6 Supply Chain Security
 
@@ -1508,6 +1507,7 @@ Validation occurs before any side effects. If input is invalid, no file I/O is p
 
 - `JSONStorage.Read()` handles missing files gracefully (returns empty slice).
 - `JSONStorage.Write()` uses atomic writes.
+- `JSONStorage.Lock()`/`Unlock()` provide cross-process file locking to prevent concurrent write corruption.
 - All public functions check their inputs.
 - ID generation via the repository defends against max-ID overflow (defensive about edge cases).
 
@@ -1947,7 +1947,7 @@ func (s *TaskService) AddTask(description string) (domain.Task, error) {
 
 - Git-based sync (commit tasks.json to a private repo).
 - Cloud sync (Dropbox, Google Drive file watcher).
-- Merge strategy for concurrent edits.
+- Merge strategy for concurrent edits (partially addressed by file locking — protects writes but does not resolve semantic conflicts).
 
 ### 16.6 Tags / Categories
 

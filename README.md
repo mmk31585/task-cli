@@ -13,6 +13,7 @@ A minimalist, production-grade CLI task tracker written in **Go** following **Cl
 - **Mark** tasks as `in-progress` / `done`
 - **JSON** output by default with optional human-readable `--table` format
 - **Auto-increment** integer IDs
+- **Cross-process file locking** — safe concurrent access via `flock` (Unix) / `LockFileEx` (Windows)
 - **No external dependencies** — 100% Go standard library
 
 ---

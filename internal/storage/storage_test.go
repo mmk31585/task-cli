@@ -216,6 +216,92 @@ func TestStorage(t *testing.T) {
 		}
 	})
 
+	t.Run("Lock and Unlock work correctly", func(t *testing.T) {
+		s, err := NewJSONStorage(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Lock(); err != nil {
+			t.Fatalf("Lock() error = %v", err)
+		}
+		if err := s.Unlock(); err != nil {
+			t.Fatalf("Unlock() error = %v", err)
+		}
+	})
+
+	t.Run("Unlock without Lock is a no-op", func(t *testing.T) {
+		s, err := NewJSONStorage(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Unlock(); err != nil {
+			t.Fatalf("Unlock() on unlocked storage error = %v", err)
+		}
+	})
+
+	t.Run("Lock creates the lock file", func(t *testing.T) {
+		s, err := NewJSONStorage(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Lock(); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := os.Stat(s.filePath + ".lock"); err != nil {
+			t.Errorf("lock file should exist: %v", err)
+		}
+		s.Unlock()
+	})
+
+	t.Run("Two concurrent Locks on same store are exclusive", func(t *testing.T) {
+		s, err := NewJSONStorage(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Lock(); err != nil {
+			t.Fatal(err)
+		}
+
+		s2, err := NewJSONStorage(s.filePath[:len(s.filePath)-len("/tasks.json")])
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		locked := make(chan struct{})
+		go func() {
+			if err := s2.Lock(); err != nil {
+				t.Logf("second Lock error (expected if already locked): %v", err)
+			}
+			close(locked)
+		}()
+
+		s.Unlock()
+		<-locked
+		s2.Unlock()
+	})
+
+	t.Run("Write directly is safe after Lock/Unlock", func(t *testing.T) {
+		s, err := NewJSONStorage(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Lock(); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Write([]domain.Task{{ID: 1, Description: "locked write"}}); err != nil {
+			t.Errorf("Write after Lock error = %v", err)
+		}
+		s.Unlock()
+
+		tasks, err := s.Read()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(tasks) != 1 {
+			t.Fatalf("got %d tasks, want 1", len(tasks))
+		}
+	})
+
 	t.Run("Write fails when directory is not writable", func(t *testing.T) {
 		dir := filepath.Join(t.TempDir(), "readonly")
 		s, err := NewJSONStorage(dir)

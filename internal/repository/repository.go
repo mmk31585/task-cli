@@ -25,6 +25,10 @@ func NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository {
 }
 
 func (r *JSONTaskRepository) Add(description string) (domain.Task, error) {
+	if err := r.store.Lock(); err != nil {
+		return domain.Task{}, fmt.Errorf("acquire lock: %w", err)
+	}
+	defer r.store.Unlock()
 	tasks, err := r.store.Read()
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("read tasks: %w", err)
@@ -50,6 +54,10 @@ func (r *JSONTaskRepository) Add(description string) (domain.Task, error) {
 }
 
 func (r *JSONTaskRepository) GetAll() ([]domain.Task, error) {
+	if err := r.store.Lock(); err != nil {
+		return nil, fmt.Errorf("acquire lock: %w", err)
+	}
+	defer r.store.Unlock()
 	tasks, err := r.store.Read()
 	if err != nil {
 		return nil, fmt.Errorf("read tasks: %w", err)
@@ -58,6 +66,10 @@ func (r *JSONTaskRepository) GetAll() ([]domain.Task, error) {
 }
 
 func (r *JSONTaskRepository) GetByID(id int64) (domain.Task, error) {
+	if err := r.store.Lock(); err != nil {
+		return domain.Task{}, fmt.Errorf("acquire lock: %w", err)
+	}
+	defer r.store.Unlock()
 	tasks, err := r.store.Read()
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("read tasks: %w", err)
@@ -71,6 +83,10 @@ func (r *JSONTaskRepository) GetByID(id int64) (domain.Task, error) {
 }
 
 func (r *JSONTaskRepository) Update(task domain.Task) (domain.Task, error) {
+	if err := r.store.Lock(); err != nil {
+		return domain.Task{}, fmt.Errorf("acquire lock: %w", err)
+	}
+	defer r.store.Unlock()
 	tasks, err := r.store.Read()
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("read tasks: %w", err)
@@ -88,6 +104,10 @@ func (r *JSONTaskRepository) Update(task domain.Task) (domain.Task, error) {
 }
 
 func (r *JSONTaskRepository) Delete(id int64) error {
+	if err := r.store.Lock(); err != nil {
+		return fmt.Errorf("acquire lock: %w", err)
+	}
+	defer r.store.Unlock()
 	tasks, err := r.store.Read()
 	if err != nil {
 		return fmt.Errorf("read tasks: %w", err)

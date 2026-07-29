@@ -2,6 +2,7 @@ package repository
 
 import (
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/mmk31585/task-cli/internal/domain"
@@ -15,6 +16,41 @@ func newTestRepo(t *testing.T) *JSONTaskRepository {
 		t.Fatal(err)
 	}
 	return NewJSONTaskRepository(store)
+}
+
+func TestConcurrentAdds(t *testing.T) {
+	r := newTestRepo(t)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 20; j++ {
+				_, err := r.Add("concurrent task")
+				if err != nil {
+					t.Logf("Add error: %v", err)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	tasks, err := r.GetAll()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tasks) != 100 {
+		t.Fatalf("got %d tasks, want 100", len(tasks))
+	}
+
+	ids := make(map[int64]bool)
+	for _, task := range tasks {
+		if ids[task.ID] {
+			t.Fatalf("duplicate ID: %d", task.ID)
+		}
+		ids[task.ID] = true
+	}
 }
 
 func TestRepository(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/mmk31585/task-cli/internal/domain"
 )
@@ -17,6 +18,8 @@ var ErrCorruptedFile = errors.New("failed to unmarshal the JSON file")
 
 type JSONStorage struct {
 	filePath string
+	mu       sync.Mutex
+	lockFile *os.File
 }
 
 func NewJSONStorage(dataDir string) (*JSONStorage, error) {
@@ -66,6 +69,38 @@ func (s *JSONStorage) Write(tasks []domain.Task) error {
 	if err := os.Rename(tmpPath, s.filePath); err != nil {
 		os.Remove(tmpPath)
 		return fmt.Errorf("rename temp file: %w", err)
+	}
+	return nil
+}
+
+func (s *JSONStorage) Lock() error {
+	f, err := os.OpenFile(s.filePath+".lock", os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return fmt.Errorf("open lock file: %w", err)
+	}
+	if err := platformLock(f); err != nil {
+		f.Close()
+		return fmt.Errorf("acquire lock: %w", err)
+	}
+	s.mu.Lock()
+	s.lockFile = f
+	s.mu.Unlock()
+	return nil
+}
+
+func (s *JSONStorage) Unlock() error {
+	s.mu.Lock()
+	lf := s.lockFile
+	s.lockFile = nil
+	s.mu.Unlock()
+	if lf == nil {
+		return nil
+	}
+	if err := platformUnlock(lf); err != nil {
+		return fmt.Errorf("release lock: %w", err)
+	}
+	if err := lf.Close(); err != nil {
+		return fmt.Errorf("close lock file: %w", err)
 	}
 	return nil
 }
