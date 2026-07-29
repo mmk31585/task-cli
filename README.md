@@ -357,39 +357,39 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `JSONStorage` struct with `filePath string` field
-- [ ] Write `NewJSONStorage(dataDir string) *JSONStorage` constructor
-- [ ] Resolve default data directory as `~/.task-cli` using `os.UserHomeDir()`
-- [ ] Support `TASK_CLI_DATA_DIR` environment variable override
-- [ ] Implement `Read() ([]domain.Task, error)`:
-  - [ ] Return empty slice if file does not exist (first run)
-  - [ ] Use `os.ReadFile`
-  - [ ] Unmarshal with `json.Unmarshal`
-  - [ ] Return `ErrCorruptedFile` on JSON syntax errors
-- [ ] Implement `Write(tasks []domain.Task) error`:
-  - [ ] Marshal with `json.MarshalIndent` (2-space indent)
-  - [ ] Write to a temporary file in the same directory
-  - [ ] Use `os.Rename` for atomic replacement
-  - [ ] Create data directory with `os.MkdirAll` if needed
+- ✅ Define `JSONStorage` struct with `filePath string` field
+- ✅ Write `NewJSONStorage(dataDir string) *JSONStorage` constructor
+- ✅ Resolve default data directory as `~/.task-cli` using `os.UserHomeDir()`
+- ✅ Support `TASK_CLI_DATA_DIR` environment variable override
+- ✅ Implement `Read() ([]domain.Task, error)`:
+  - ✅ Return empty slice if file does not exist (first run)
+  - ✅ Use `os.ReadFile`
+  - ✅ Unmarshal with `json.Unmarshal`
+  - ✅ Return `ErrCorruptedFile` on JSON syntax errors
+- ✅ Implement `Write(tasks []domain.Task) error`:
+  - ✅ Marshal with `json.MarshalIndent` (2-space indent)
+  - ✅ Write to a temporary file in the same directory
+  - ✅ Use `os.Rename` for atomic replacement
+  - ✅ Create data directory with `os.MkdirAll` if needed
 - [ ] Ensure all exported functions have Go doc comments
 - [ ] Commit: `feat(storage): add JSON file storage with atomic writes`
 
 **Testing Checklist:**
 
-- [ ] Test `Read` on non-existent file returns empty slice (not error)
-- [ ] Test `Read` on valid file returns parsed tasks
-- [ ] Test `Read` on corrupted JSON returns `ErrCorruptedFile`
-- [ ] Test `Write` creates the file
-- [ ] Test `Write` produces valid JSON (read back and compare)
-- [ ] Test atomic write: write, then verify original file is intact
-- [ ] Test `Write` creates the data directory if missing
-- [ ] Test `TASK_CLI_DATA_DIR` env var overrides the default path
-- [ ] Test `Read` on empty file returns empty slice
+- ✅ Test `Read` on non-existent file returns empty slice (not error)
+- ✅ Test `Read` on valid file returns parsed tasks
+- ✅ Test `Read` on corrupted JSON returns `ErrCorruptedFile`
+- ✅ Test `Write` creates the file
+- ✅ Test `Write` produces valid JSON (read back and compare)
+- ✅ Test atomic write: write, then verify original file is intact
+- ✅ Test `Write` creates the data directory if missing
+- ✅ Test `TASK_CLI_DATA_DIR` env var overrides the default path
+- ✅ Test `Read` on empty file returns empty slice
 
 **Definition of Done:**
 
-- [ ] All CRUD operations on the file layer work correctly
-- [ ] Atomic write prevents file corruption on failure
+- ✅ All CRUD operations on the file layer work correctly
+- ✅ Atomic write prevents file corruption on failure
 - [ ] Coverage > 90%
 
 ---
