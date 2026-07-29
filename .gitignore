@@ -1,2 +1,5 @@
 .env
 .idea
+c.out
+coverage.out
+task-cli

@@ -38,11 +38,18 @@ A minimalist, production-grade CLI task tracker written in **Go** following **Cl
 git clone https://github.com/mmk31585/task-cli.git
 cd task-cli
 
-# Build
+# Build (produces ./task-cli binary)
 go build -o task-cli ./cmd/task-cli
+# or
+make build
 
-# (Optional) Install to $GOPATH/bin
+# Install globally to $GOPATH/bin (requires ~/go/bin in PATH)
 go install ./cmd/task-cli
+# or
+make install
+
+# Verify
+task-cli --help
 ```
 
 ---
@@ -171,20 +178,29 @@ Higher layers depend on abstractions (interfaces), never on concrete implementat
 ## Development Workflow
 
 ```bash
-# Run directly
+# Run directly (no build needed)
 go run ./cmd/task-cli list
 
-# Run tests
-go test ./...
+# Full quality check (fmt → vet → build → test)
+make all
+
+# Run tests with race detector and coverage
+make test
 
 # Format code
-go fmt ./...
+make fmt
 
 # Vet code
-go vet ./...
+make vet
 
-# Build
-go build -o task-cli ./cmd/task-cli
+# Build binary
+make build
+
+# Install globally
+make install
+
+# Clean artifacts
+make clean
 ```
 
 ---
@@ -325,7 +341,7 @@ Before any implementation begins:
 - ✅ Define `Task` struct with fields: `ID`, `Description`, `Status`, `CreatedAt`, `UpdatedAt`
 - ✅ Add JSON struct tags (`json:"id"`, `json:"description"`, etc.)
 - ✅ Use `time.Time` for timestamp fields
-- ✅ Define sentinel errors: `ErrTaskNotFound`, `ErrInvalidStatus`, `ErrEmptyDescription`, `ErrDescriptionTooLong`
+- ✅ Define sentinel error: `ErrTaskNotFound` (description validation errors live in `validator`, status errors live in `service`)
 - ✅ Verify package compiles: `go build ./internal/domain/...`
 - ✅ Commit: `feat(domain): add Task entity, Status type, and domain errors`
 
@@ -400,11 +416,11 @@ Before any implementation begins:
 **TODO Checklist:**
 
 - ✅ Define `TaskRepository` interface with:
-  - ✅ `Add(task domain.Task) error`
+  - ✅ `Add(description string) (domain.Task, error)`
   - ✅ `GetAll() ([]domain.Task, error)`
-  - ✅ `GetByID(id string) (domain.Task, error)`
-  - ✅ `Update(task domain.Task) error`
-  - ✅ `Delete(id string) error`
+  - ✅ `GetByID(id int64) (domain.Task, error)`
+  - ✅ `Update(task domain.Task) (domain.Task, error)`
+  - ✅ `Delete(id int64) error`
 - ✅ Define `JSONTaskRepository` struct with `store *storage.JSONStorage` field
 - ✅ Write `NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository`
 - ✅ Implement `Add`: read all, append, write all
@@ -443,30 +459,29 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Implement `ValidateDescription(desc string) error`:
-  - [ ] Return `ErrEmptyDescription` if `desc` is empty or whitespace-only
-  - [ ] Return `ErrDescriptionTooLong` if `len(desc) > 500`
-  - [ ] Return `nil` otherwise
-- [ ] Implement `ValidateID(id string) error`:
-  - [ ] Return error if `id` is empty
-- [ ] Ensure all functions are pure (no I/O, no state)
-- [ ] Commit: `feat(validator): add input validation functions`
+- ✅ Implement `ValidateDescription(desc string) error`:
+  - ✅ Return `ErrEmptyDescription` if `desc` is empty or whitespace-only
+  - ✅ Return `ErrDescriptionTooLong` if `len(desc) > 500`
+  - ✅ Return `nil` otherwise
+- ✅ Implement `ValidateID(id int64) error`:
+- ✅ Ensure all functions are pure (no I/O, no state)
+- ✅ Commit: `feat(validator): add input validation functions`
 
 **Testing Checklist:**
 
-- [ ] Test `ValidateDescription("")` returns error
-- [ ] Test `ValidateDescription("  ")` returns error
-- [ ] Test `ValidateDescription(strings.Repeat("a", 501))` returns error
-- [ ] Test `ValidateDescription("Buy milk")` returns `nil`
-- [ ] Test `ValidateDescription(strings.Repeat("a", 500))` returns `nil`
-- [ ] Test `ValidateID("")` returns error
-- [ ] Test `ValidateID("abc")` returns `nil`
+- ✅ Test `ValidateDescription("")` returns error
+- ✅ Test `ValidateDescription("  ")` returns error
+- ✅ Test `ValidateDescription(strings.Repeat("a", 501))` returns error
+- ✅ Test `ValidateDescription("Buy milk")` returns `nil`
+- ✅ Test `ValidateDescription(strings.Repeat("a", 500))` returns `nil`
+- ✅ Test `ValidateID(-5)` returns error
+- ✅ Test `ValidateID(3)` returns `nil`
 
 **Definition of Done:**
 
-- [ ] All validation functions are pure (no side effects)
-- [ ] Boundary conditions tested (0, 1, 500, 501 characters)
-- [ ] Coverage 100%
+- ✅ All validation functions are pure (no side effects)
+- ✅ Boundary conditions tested (0, 1, 500, 501 characters)
+- ✅ Coverage 100%
 
 ---
 
@@ -479,33 +494,33 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Implement `FormatTaskJSON(task domain.Task) (string, error)`:
-  - [ ] Use `json.MarshalIndent` with 2-space indent
-  - [ ] Return formatted JSON string
-- [ ] Implement `FormatTasksJSON(tasks []domain.Task) (string, error)`:
-  - [ ] Marshal the entire slice as a JSON array
-- [ ] Implement `FormatTasksTable(tasks []domain.Task) (string, error)`:
-  - [ ] Use `text/tabwriter`
-  - [ ] Columns: ID, Description, Status, Created At, Updated At
-  - [ ] Header row with column names
-  - [ ] Align columns properly
-  - [ ] Handle empty slice (print "No tasks found")
-- [ ] Commit: `feat(formater): add JSON and table output formatters`
+- ✅ Implement `FormatTaskJSON(task domain.Task) (string, error)`:
+  - ✅ Use `json.MarshalIndent` with 2-space indent
+  - ✅ Return formatted JSON string
+- ✅ Implement `FormatTasksJSON(tasks []domain.Task) (string, error)`:
+  - ✅ Marshal the entire slice as a JSON array
+- ✅ Implement `FormatTasksTable(tasks []domain.Task) (string, error)`:
+  - ✅ Use `text/tabwriter`
+  - ✅ Columns: ID, Description, Status, Created At, Updated At
+  - ✅ Header row with column names
+  - ✅ Align columns properly
+  - ✅ Handle empty slice (print "No tasks found")
+- ✅ Commit: `feat(formater): add JSON and table output formatters`
 
 **Testing Checklist:**
 
-- [ ] Test `FormatTaskJSON` produces valid JSON with correct fields
-- [ ] Test `FormatTasksJSON` produces a JSON array
-- [ ] Test `FormatTasksTable` produces a formatted table with headers
-- [ ] Test `FormatTasksTable` with empty slice prints "No tasks found"
-- [ ] Test table format aligns columns correctly (fixed-width test)
-- [ ] Test edge case: single task, many tasks
+- ✅ Test `FormatTaskJSON` produces valid JSON with correct fields
+- ✅ Test `FormatTasksJSON` produces a JSON array
+- ✅ Test `FormatTasksTable` produces a formatted table with headers
+- ✅ Test `FormatTasksTable` with empty slice prints "No tasks found"
+- ✅ Test table format aligns columns correctly (fixed-width test)
+- ✅ Test edge case: single task, many tasks
 
 **Definition of Done:**
 
-- [ ] Both output formats work correctly
-- [ ] Table output uses `text/tabwriter` for alignment
-- [ ] Coverage > 95%
+- ✅ Both output formats work correctly
+- ✅ Table output uses `text/tabwriter` for alignment
+- ✅ Coverage > 95%
 
 ---
 
@@ -518,54 +533,52 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `TaskService` struct with `repo repository.TaskRepository` field
-- [ ] Write `NewTaskService(repo repository.TaskRepository) *TaskService`
-- [ ] Implement `AddTask(description string) (domain.Task, error)`:
-  - [ ] Call `validator.ValidateDescription`
-  - [ ] Generate next auto-increment ID via `repo.NextID()`
-  - [ ] Create `domain.Task` with status `StatusTodo`, timestamps set to `time.Now()`
-  - [ ] Call `repo.Add`
-  - [ ] Return the created task
-- [ ] Implement `ListTasks(status string) ([]domain.Task, error)`:
-  - [ ] Call `repo.GetAll()`
-  - [ ] If status is empty, return all tasks
-  - [ ] If status is set, filter by status (validate status first)
-- [ ] Implement `UpdateTask(id, description string) (domain.Task, error)`:
-  - [ ] Validate description
-  - [ ] Get task by ID
-  - [ ] Update description and `UpdatedAt`
-  - [ ] Persist via `repo.Update`
-- [ ] Implement `DeleteTask(id string) error`:
-  - [ ] Check task exists (call `GetByID` — let it return `ErrTaskNotFound`)
-  - [ ] Delete via `repo.Delete`
-- [ ] Implement `MarkTask(id string, status domain.Status) (domain.Task, error)`:
-  - [ ] Validate status with `domain.IsValidStatus`
-  - [ ] Get task by ID
-  - [ ] Set status and `UpdatedAt`
-  - [ ] Persist via `repo.Update`
-- [ ] Commit: `feat(service): add business logic layer with use cases`
+- ✅ Define `TaskService` struct with `repo repository.TaskRepository` field
+- ✅ Write `NewTaskService(repo repository.TaskRepository) *TaskService`
+- ✅ Implement `AddTask(description string) (domain.Task, error)`:
+  - ✅ Call `validator.ValidateDescription`
+  - ✅ Call `repo.Add` (repo handles ID generation, status, and timestamps)
+  - ✅ Return the created task
+- ✅ Implement `ListTasks(status string) ([]domain.Task, error)`:
+  - ✅ Call `repo.GetAll()`
+  - ✅ If status is empty, return all tasks
+  - ✅ If status is set, filter by status (validate status first)
+- ✅ Implement `UpdateTask(id int64, description string) (domain.Task, error)`:
+  - ✅ Validate description
+  - ✅ Get task by ID
+  - ✅ Update description and `UpdatedAt`
+  - ✅ Persist via `repo.Update`
+- ✅ Implement `DeleteTask(id int64) error`:
+  - ✅ Check task exists (call `GetByID` — let it return `ErrTaskNotFound`)
+  - ✅ Delete via `repo.Delete`
+- ✅ Implement `MarkTask(id int64, status domain.Status) (domain.Task, error)`:
+  - ✅ Validate status with `domain.IsValidStatus`
+  - ✅ Get task by ID
+  - ✅ Set status and `UpdatedAt`
+  - ✅ Persist via `repo.Update`
+- ✅ Commit: `feat(service): add business logic layer with use cases`
 
 **Testing Checklist:**
 
-- [ ] Test `AddTask` with valid description returns task with `StatusTodo`
-- [ ] Test `AddTask` with empty description returns error (no I/O)
-- [ ] Test `AddTask` with long description returns error (no I/O)
-- [ ] Test `ListTasks("")` returns all tasks
-- [ ] Test `ListTasks("done")` returns only done tasks
-- [ ] Test `ListTasks("invalid")` returns error
-- [ ] Test `UpdateTask` with valid input updates description and `UpdatedAt`
-- [ ] Test `UpdateTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `DeleteTask` removes task
-- [ ] Test `DeleteTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `MarkTask` transitions status correctly
-- [ ] Test `MarkTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `MarkTask` with invalid status returns error
+- ✅ Test `AddTask` with valid description returns task with `StatusTodo`
+- ✅ Test `AddTask` with empty description returns error (no I/O)
+- ✅ Test `AddTask` with long description returns error (no I/O)
+- ✅ Test `ListTasks("")` returns all tasks
+- ✅ Test `ListTasks("done")` returns only done tasks
+- ✅ Test `ListTasks("invalid")` returns error
+- ✅ Test `UpdateTask` with valid input updates description and `UpdatedAt`
+- ✅ Test `UpdateTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `DeleteTask` removes task
+- ✅ Test `DeleteTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `MarkTask` transitions status correctly
+- ✅ Test `MarkTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `MarkTask` with invalid status returns error
 
 **Definition of Done:**
 
-- [ ] All use cases operate correctly with a mock repository
-- [ ] No business logic leaks into the CLI or repository layers
-- [ ] Coverage > 90%
+- ✅ All use cases operate correctly with a mock repository
+- ✅ No business logic leaks into the CLI or repository layers
+- ✅ Coverage > 90%
 
 ---
 
@@ -579,73 +592,73 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `Handler` struct with `svc *service.TaskService` field
-- [ ] Write `NewHandler(svc *service.TaskService) *Handler`
-- [ ] Implement `HandleAdd(args []string)`:
-  - [ ] Require exactly 1 argument (description)
-  - [ ] Call `svc.AddTask`
-  - [ ] Format output with `formater.FormatTaskJSON`
-  - [ ] Handle error (print to stderr, exit 1)
-- [ ] Implement `HandleUpdate(args []string)`:
-  - [ ] Require exactly 2 arguments (id, description)
-  - [ ] Call `svc.UpdateTask`
-  - [ ] Output the updated task as JSON
-- [ ] Implement `HandleDelete(args []string)`:
-  - [ ] Require exactly 1 argument (id)
-  - [ ] Call `svc.DeleteTask`
-  - [ ] Output success message `{"deleted": "<id>"}`
-- [ ] Implement `HandleList(args []string, table bool)`:
-  - [ ] Accept 0 or 1 argument (optional status filter)
-  - [ ] Call `svc.ListTasks`
-  - [ ] If `table` flag is set, call `formater.FormatTasksTable`
-  - [ ] Otherwise call `formater.FormatTasksJSON`
-- [ ] Implement `HandleMark(args []string, status domain.Status)`:
-  - [ ] Require exactly 1 argument (id)
-  - [ ] Call `svc.MarkTask`
-  - [ ] Output the updated task as JSON
-- [ ] In `cmd/task-cli/main.go`:
-  - [ ] Parse `os.Args[1]` for the command name
-  - [ ] Wire dependencies: `storage → repository → service → handler`
-  - [ ] Use `flag.FlagSet` per command for `--table`, `--help`
-  - [ ] Implement `help` command / `--help` flag
-  - [ ] Dispatch to the correct handler method
-  - [ ] Set `os.Exit(0)` on success, `os.Exit(1)` on error
-- [ ] Test all commands manually:
-  - [ ] `task-cli add "Test task"` → success
-  - [ ] `task-cli list` → shows tasks
-  - [ ] `task-cli list --table` → table format
-  - [ ] `task-cli list done` → filtered
-  - [ ] `task-cli update <id> "New desc"` → updated
-  - [ ] `task-cli delete <id>` → deleted
-  - [ ] `task-cli mark-in-progress <id>` → status changed
-  - [ ] `task-cli mark-done <id>` → status changed
-  - [ ] `task-cli add ""` → error message
-  - [ ] `task-cli` (no args) → help text
-  - [ ] `task-cli --help` → help text
-  - [ ] `task-cli unknown` → "unknown command" error
-- [ ] Commit: `feat(cli): add CLI handler, command dispatch, and all commands`
+- ✅ Define `Handler` struct with `svc *service.TaskService` field
+- ✅ Write `NewHandler(svc *service.TaskService) *Handler`
+- ✅ Implement `HandleAdd(args []string)`:
+  - ✅ Require exactly 1 argument (description)
+  - ✅ Call `svc.AddTask`
+  - ✅ Format output with `formater.FormatTaskJSON`
+  - ✅ Handle error (print to stderr, exit 1)
+- ✅ Implement `HandleUpdate(args []string)`:
+  - ✅ Require exactly 2 arguments (id, description)
+  - ✅ Call `svc.UpdateTask`
+  - ✅ Output the updated task as JSON
+- ✅ Implement `HandleDelete(args []string)`:
+  - ✅ Require exactly 1 argument (id)
+  - ✅ Call `svc.DeleteTask`
+  - ✅ Output success message `{"deleted": "<id>"}`
+- ✅ Implement `HandleList(args []string, table bool)`:
+  - ✅ Accept 0 or 1 argument (optional status filter)
+  - ✅ Call `svc.ListTasks`
+  - ✅ If `table` flag is set, call `formater.FormatTasksTable`
+  - ✅ Otherwise call `formater.FormatTasksJSON`
+- ✅ Implement `HandleMark(args []string, status domain.Status)`:
+  - ✅ Require exactly 1 argument (id)
+  - ✅ Call `svc.MarkTask`
+  - ✅ Output the updated task as JSON
+- ✅ In `cmd/task-cli/main.go`:
+  - ✅ Parse `os.Args[1]` for the command name
+  - ✅ Wire dependencies: `storage → repository → service → handler`
+  - ✅ Use `flag.FlagSet` per command for `--table`, `--help`
+  - ✅ Implement `help` command / `--help` flag
+  - ✅ Dispatch to the correct handler method
+  - ✅ Set `os.Exit(0)` on success, `os.Exit(1)` on error
+- ✅ Test all commands manually:
+  - ✅ `task-cli add "Test task"` → success
+  - ✅ `task-cli list` → shows tasks
+  - ✅ `task-cli list --table` → table format
+  - ✅ `task-cli list done` → filtered
+  - ✅ `task-cli update <id> "New desc"` → updated
+  - ✅ `task-cli delete <id>` → deleted
+  - ✅ `task-cli mark-in-progress <id>` → status changed
+  - ✅ `task-cli mark-done <id>` → status changed
+  - ✅ `task-cli add ""` → error message
+  - ✅ `task-cli` (no args) → help text
+  - ✅ `task-cli --help` → help text
+  - ✅ `task-cli unknown` → "unknown command" error
+- ✅ Commit: `feat(cli): add CLI handler, command dispatch, and all commands`
 
 **Testing Checklist:**
 
-- [ ] Test `HandleAdd` with correct args outputs JSON to stdout
-- [ ] Test `HandleAdd` with missing args writes error to stderr, exits 1
-- [ ] Test `HandleList` outputs JSON array
-- [ ] Test `HandleList --table` outputs formatted table
-- [ ] Test `HandleList done` outputs only done tasks
-- [ ] Test `HandleUpdate` with correct args outputs updated task
-- [ ] Test `HandleDelete` outputs success JSON
-- [ ] Test `HandleMark` outputs updated task with new status
-- [ ] Test unknown command returns error
-- [ ] Test no command prints help
-- [ ] Test `--help` flag prints help
-- [ ] Test all error paths produce non-zero exit code
+- ✅ Test `HandleAdd` with correct args outputs JSON to stdout
+- ✅ Test `HandleAdd` with missing args writes error to stderr, exits 1
+- ✅ Test `HandleList` outputs JSON array
+- ✅ Test `HandleList --table` outputs formatted table
+- ✅ Test `HandleList done` outputs only done tasks
+- ✅ Test `HandleUpdate` with correct args outputs updated task
+- ✅ Test `HandleDelete` outputs success JSON
+- ✅ Test `HandleMark` outputs updated task with new status
+- ✅ Test unknown command returns error
+- ✅ Test no command prints help
+- ✅ Test `--help` flag prints help
+- ✅ Test all error paths produce non-zero exit code
 
 **Definition of Done:**
 
-- [ ] All 7 commands work correctly from the terminal
-- [ ] Error messages go to stderr, output goes to stdout
-- [ ] Exit codes are correct (0 success, 1 error)
-- [ ] `--help` and `--table` work as documented
+- ✅ All 7 commands work correctly from the terminal
+- ✅ Error messages go to stderr, output goes to stdout
+- ✅ Exit codes are correct (0 success, 1 error)
+- ✅ `--help` and `--table` work as documented
 
 ---
 
@@ -658,28 +671,28 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Ensure every error returned from storage is wrapped with context in the repository layer
-- [ ] Ensure every error returned from repository is wrapped with context in the service layer
-- [ ] Ensure sentinel errors (`ErrTaskNotFound`, `ErrInvalidStatus`, etc.) are preserved with `%w` wrapping
-- [ ] In CLI handler, use `errors.Is` to detect sentinel errors and print user-friendly messages
-- [ ] Handle unexpected panics: add `defer/recover` in `main.go` to prevent stack traces leaking to the user
-- [ ] Ensure all `fmt.Fprintln(os.Stderr, ...)` calls use consistent formatting: `"Error: <message>"`
-- [ ] Test error messages read naturally (e.g., "task with ID abc-123 not found" not "error: task not found")
-- [ ] Commit: `refactor(errors): polish error wrapping and user-facing messages`
+- ✅ Ensure every error returned from storage is wrapped with context in the repository layer
+- ✅ Ensure every error returned from repository is wrapped with context in the service layer
+- ✅ Ensure sentinel errors (`ErrTaskNotFound`, `ErrStatusInvalid`, `ErrEmptyDescription`, `ErrDescriptionTooLong`, `ErrIDIsInvalid`) are preserved with `%w` wrapping
+- ✅ In CLI handler, use `errors.Is` to detect sentinel errors and print user-friendly messages
+- ✅ Handle unexpected panics: add `defer/recover` in `main.go` to prevent stack traces leaking to the user
+- ✅ Ensure all `fmt.Fprintln(os.Stderr, ...)` calls use consistent formatting: `"Error: <message>"`
+- ✅ Test error messages read naturally (e.g., "task with ID abc-123 not found" not "error: task not found")
+- ✅ Commit: `refactor(errors): polish error wrapping and user-facing messages`
 
 **Testing Checklist:**
 
-- [ ] Test that `ErrTaskNotFound` propagated through CLI shows a user-friendly message
-- [ ] Test that `ErrCorruptedFile` shows a message suggesting how to fix it
-- [ ] Test that an unexpected panic in the service layer is caught and does not crash with stack trace
-- [ ] Test all error paths in every command
+- ✅ Test that `ErrTaskNotFound` propagated through CLI shows a user-friendly message
+- ✅ Test that `ErrCorruptedFile` shows a message suggesting how to fix it
+- ✅ Test that an unexpected panic in the service layer is caught and does not crash with stack trace
+- ✅ Test all error paths in every command
 
 **Definition of Done:**
 
-- [ ] No raw errors are printed to the user
-- [ ] All errors use `%w` wrapping to preserve the error chain
-- [ ] `errors.Is` works across all layers
-- [ ] Panics are caught and converted to user-friendly errors
+- ✅ No raw errors are printed to the user
+- ✅ All errors use `%w` wrapping to preserve the error chain
+- ✅ `errors.Is` works across all layers
+- ✅ Panics are caught and converted to user-friendly errors
 
 ---
 
@@ -693,48 +706,48 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Write domain tests: `internal/domain/task_test.go`
-  - [ ] Test `IsValidStatus` for all valid and invalid values
-  - [ ] Test sentinel error comparisons
-- [ ] Write ID generation tests
-  - [ ] Test format, uniqueness, time-ordering
-- [ ] Write storage tests: `internal/storage/storage_test.go`
-  - [ ] Use `os.CreateTemp` for isolated test directories
-  - [ ] Test read/write/corruption/atomicity
-- [ ] Write repository tests: `internal/repository/repository_test.go`
-  - [ ] Use real `JSONStorage` with temp files (not mocks)
-  - [ ] Test all CRUD operations
-- [ ] Write validator tests: `internal/validator/validator_test.go`
-  - [ ] Test boundary conditions
-- [ ] Write formatter tests: `internal/formater/formater_test.go`
-  - [ ] Test JSON and table output
-  - [ ] Golden file comparison for table format
-- [ ] Write service tests: `internal/service/service_test.go`
-  - [ ] Use a hand-written in-memory mock repository
-  - [ ] Test all use cases, error paths, edge cases
-- [ ] Write CLI handler tests: `internal/cli/handler_test.go`
-  - [ ] Capture stdout/stderr with `bytes.Buffer`
-  - [ ] Use a mock service
-  - [ ] Test each command
-- [ ] Run `go test -race ./...` and fix any races
-- [ ] Run `go test -coverprofile=coverage.out ./...` and verify coverage
-- [ ] Review coverage report: `go tool cover -html=coverage.out`
-- [ ] Commit: `test: add complete test suite for all layers`
+- ✅ Write domain tests: `internal/domain/task_test.go`
+  - ✅ Test `IsValidStatus` for all valid and invalid values
+  - ✅ Test sentinel error comparisons
+- ✅ Write ID generation tests
+  - ✅ Test format, uniqueness, time-ordering
+- ✅ Write storage tests: `internal/storage/storage_test.go`
+  - ✅ Use `os.CreateTemp` for isolated test directories
+  - ✅ Test read/write/corruption/atomicity
+- ✅ Write repository tests: `internal/repository/repository_test.go`
+  - ✅ Use real `JSONStorage` with temp files (not mocks)
+  - ✅ Test all CRUD operations
+- ✅ Write validator tests: `internal/validator/validator_test.go`
+  - ✅ Test boundary conditions
+- ✅ Write formatter tests: `internal/formater/formater_test.go`
+  - ✅ Test JSON and table output
+  - ✅ Golden file comparison for table format
+- ✅ Write service tests: `internal/service/service_test.go`
+  - ✅ Use a hand-written in-memory mock repository
+  - ✅ Test all use cases, error paths, edge cases
+- ✅ Write CLI handler tests: `internal/cli/handler_test.go`
+  - ✅ Capture stdout/stderr with `bytes.Buffer`
+  - ✅ Use a mock service
+  - ✅ Test each command
+- ✅ Run `go test -race ./...` and fix any races
+- ✅ Run `go test -coverprofile=coverage.out ./...` and verify coverage
+- ✅ Review coverage report: `go tool cover -html=coverage.out`
+- ✅ Commit: `test: add complete test suite for all layers`
 
 **Testing Checklist:**
 
-- [ ] All tests pass: `go test ./...`
-- [ ] Race detector clean: `go test -race ./...`
-- [ ] Coverage > 80%: `go test -cover ./...`
-- [ ] Every exported function has at least one test
-- [ ] Edge cases covered: empty list, invalid input, corrupted file, missing file
+- ✅ All tests pass: `go test ./...`
+- ✅ Race detector clean: `go test -race ./...`
+- ✅ Coverage > 80%: `go test -cover ./...`
+- ✅ Every exported function has at least one test
+- ✅ Edge cases covered: empty list, invalid input, corrupted file, missing file
 
 **Definition of Done:**
 
-- [ ] `go test -race -cover ./...` passes with > 80% coverage
-- [ ] Mock repository is available for service tests
-- [ ] All test files follow the same pattern
-- [ ] Tests are order-independent (can run in any order)
+- ✅ `go test -race -cover ./...` passes with > 80% coverage
+- ✅ Mock repository is available for service tests
+- ✅ All test files follow the same pattern
+- ✅ Tests are order-independent (can run in any order)
 
 ---
 
@@ -749,25 +762,25 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Review `README.md` for completeness
-- [ ] Review `docs/software-design-document.md` for accuracy
-- [ ] Ensure all exported types, functions, and constants have Go doc comments
-- [ ] Add package-level doc comments to each package
-- [ ] Verify `go doc ./...` output is readable
-- [ ] Ensure every ADR in the SDD is up to date with actual implementation decisions
-- [ ] Commit: `docs: finalize project documentation`
+- ✅ Review `README.md` for completeness
+- ✅ Review `docs/software-design-document.md` for accuracy
+- ✅ Ensure all exported types, functions, and constants have Go doc comments
+- ✅ Add package-level doc comments to each package
+- ✅ Verify `go doc ./...` output is readable
+- ✅ Ensure every ADR in the SDD is up to date with actual implementation decisions
+- ✅ Commit: `docs: finalize project documentation`
 
 **Testing Checklist:**
 
-- [ ] `go doc ./...` produces no errors
-- [ ] All doc comments are complete sentences
-- [ ] No `TODO` comments remain in the code
+- ✅ `go doc ./...` produces no errors
+- ✅ All doc comments are complete sentences
+- ✅ No `TODO` comments remain in the code
 
 **Definition of Done:**
 
-- [ ] README is complete and accurate
-- [ ] SDD matches the implemented code
-- [ ] All exported symbols are documented
+- ✅ README is complete and accurate
+- ✅ SDD matches the implemented code
+- ✅ All exported symbols are documented
 
 ---
 
@@ -780,32 +793,32 @@ Before any implementation begins:
 
 **Code Quality Checklist:**
 
-- [ ] `gofmt -s .` produces no diffs
-- [ ] `go vet ./...` is clean
-- [ ] `go mod tidy` has been run
-- [ ] No duplicate code (DRY principle)
-- [ ] Clean Architecture dependency rule is respected (no inward violations)
-- [ ] SOLID principles are followed throughout
-- [ ] KISS is respected (no unnecessary abstractions)
-- [ ] YAGNI is respected (no unused code or speculative features)
-- [ ] No `init()` functions
-- [ ] No global variables (except sentinel errors)
-- [ ] No panics (except recovered in main)
-- [ ] No unused imports or variables (`go vet` would catch these)
-- [ ] All function signatures are consistent
-- [ ] No magic numbers or strings (use constants)
-- [ ] No commented-out code
-- [ ] No `_` test files without matching source files
-- [ ] All files have a consistent license header (optional)
-- [ ] `go mod verify` passes
-- [ ] `go build -o /dev/null ./cmd/task-cli` succeeds
-- [ ] Commit: `refactor: code quality review and cleanup`
+- ✅ `gofmt -s .` produces no diffs
+- ✅ `go vet ./...` is clean
+- ✅ `go mod tidy` has been run
+- ✅ No duplicate code (DRY principle)
+- ✅ Clean Architecture dependency rule is respected (no inward violations)
+- ✅ SOLID principles are followed throughout
+- ✅ KISS is respected (no unnecessary abstractions)
+- ✅ YAGNI is respected (no unused code or speculative features)
+- ✅ No `init()` functions
+- ✅ No global variables (except sentinel errors)
+- ✅ No panics (except recovered in main)
+- ✅ No unused imports or variables (`go vet` would catch these)
+- ✅ All function signatures are consistent
+- ✅ No magic numbers or strings (use constants)
+- ✅ No commented-out code
+- ✅ No `_` test files without matching source files
+- ✅ All files have a consistent license header (optional)
+- ✅ `go mod verify` passes
+- ✅ `go build -o /dev/null ./cmd/task-cli` succeeds
+- ✅ Commit: `refactor: code quality review and cleanup`
 
 **Definition of Done:**
 
-- [ ] Entire checklist above is satisfied
-- [ ] No warnings from `go vet` or `gofmt`
-- [ ] Codebase follows the project's coding standards
+- ✅ Entire checklist above is satisfied
+- ✅ No warnings from `go vet` or `gofmt`
+- ✅ Codebase follows the project's coding standards
 
 ---
 
