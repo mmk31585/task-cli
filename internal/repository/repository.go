@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mmk31585/task-cli/internal/domain"
 	"github.com/mmk31585/task-cli/internal/storage"
@@ -38,6 +39,8 @@ func (r *JSONTaskRepository) Add(description string) (domain.Task, error) {
 		ID:          nextID,
 		Description: description,
 		Status:      domain.StatusTodo,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	tasks = append(tasks, task)
 	if err := r.store.Write(tasks); err != nil {

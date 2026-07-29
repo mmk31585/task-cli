@@ -402,9 +402,9 @@ Before any implementation begins:
 - ✅ Define `TaskRepository` interface with:
   - ✅ `Add(task domain.Task) error`
   - ✅ `GetAll() ([]domain.Task, error)`
-  - ✅ `GetByID(id string) (domain.Task, error)`
+   - ✅ `GetByID(id int64) (domain.Task, error)`
   - ✅ `Update(task domain.Task) error`
-  - ✅ `Delete(id string) error`
+   - ✅ `Delete(id int64) error`
 - ✅ Define `JSONTaskRepository` struct with `store *storage.JSONStorage` field
 - ✅ Write `NewJSONTaskRepository(store *storage.JSONStorage) *JSONTaskRepository`
 - ✅ Implement `Add`: read all, append, write all
@@ -517,54 +517,54 @@ Before any implementation begins:
 
 **TODO Checklist:**
 
-- [ ] Define `TaskService` struct with `repo repository.TaskRepository` field
-- [ ] Write `NewTaskService(repo repository.TaskRepository) *TaskService`
-- [ ] Implement `AddTask(description string) (domain.Task, error)`:
-  - [ ] Call `validator.ValidateDescription`
-  - [ ] Generate next auto-increment ID via `repo.NextID()`
-  - [ ] Create `domain.Task` with status `StatusTodo`, timestamps set to `time.Now()`
-  - [ ] Call `repo.Add`
-  - [ ] Return the created task
-- [ ] Implement `ListTasks(status string) ([]domain.Task, error)`:
-  - [ ] Call `repo.GetAll()`
-  - [ ] If status is empty, return all tasks
-  - [ ] If status is set, filter by status (validate status first)
-- [ ] Implement `UpdateTask(id, description string) (domain.Task, error)`:
-  - [ ] Validate description
-  - [ ] Get task by ID
-  - [ ] Update description and `UpdatedAt`
-  - [ ] Persist via `repo.Update`
-- [ ] Implement `DeleteTask(id string) error`:
-  - [ ] Check task exists (call `GetByID` — let it return `ErrTaskNotFound`)
-  - [ ] Delete via `repo.Delete`
-- [ ] Implement `MarkTask(id string, status domain.Status) (domain.Task, error)`:
-  - [ ] Validate status with `domain.IsValidStatus`
-  - [ ] Get task by ID
-  - [ ] Set status and `UpdatedAt`
-  - [ ] Persist via `repo.Update`
+- ✅ Define `TaskService` struct with `repo repository.TaskRepository` field
+- ✅ Write `NewTaskService(repo repository.TaskRepository) *TaskService`
+- ✅ Implement `AddTask(description string) (domain.Task, error)`:
+  - ✅ Call `validator.ValidateDescription`
+  - ✅ Generate next auto-increment ID via `repo.NextID()`
+  - ✅ Create `domain.Task` with status `StatusTodo`, timestamps set to `time.Now()`
+  - ✅ Call `repo.Add`
+  - ✅ Return the created task
+- ✅ Implement `ListTasks(status string) ([]domain.Task, error)`:
+  - ✅ Call `repo.GetAll()`
+  - ✅ If status is empty, return all tasks
+  - ✅ If status is set, filter by status (validate status first)
+- ✅ Implement `UpdateTask(id int64, description string) (domain.Task, error)`:
+  - ✅ Validate description
+  - ✅ Get task by ID
+  - ✅ Update description and `UpdatedAt`
+  - ✅ Persist via `repo.Update`
+- ✅ Implement `DeleteTask(id int64) error`:
+  - ✅ Check task exists (call `GetByID` — let it return `ErrTaskNotFound`)
+  - ✅ Delete via `repo.Delete`
+- ✅ Implement `MarkTask(id int64, status domain.Status) (domain.Task, error)`:
+  - ✅ Validate status with `domain.IsValidStatus`
+  - ✅ Get task by ID
+  - ✅ Set status and `UpdatedAt`
+  - ✅ Persist via `repo.Update`
 - [ ] Commit: `feat(service): add business logic layer with use cases`
 
 **Testing Checklist:**
 
-- [ ] Test `AddTask` with valid description returns task with `StatusTodo`
-- [ ] Test `AddTask` with empty description returns error (no I/O)
-- [ ] Test `AddTask` with long description returns error (no I/O)
-- [ ] Test `ListTasks("")` returns all tasks
-- [ ] Test `ListTasks("done")` returns only done tasks
-- [ ] Test `ListTasks("invalid")` returns error
-- [ ] Test `UpdateTask` with valid input updates description and `UpdatedAt`
-- [ ] Test `UpdateTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `DeleteTask` removes task
-- [ ] Test `DeleteTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `MarkTask` transitions status correctly
-- [ ] Test `MarkTask` with unknown ID returns `ErrTaskNotFound`
-- [ ] Test `MarkTask` with invalid status returns error
+- ✅ Test `AddTask` with valid description returns task with `StatusTodo`
+- ✅ Test `AddTask` with empty description returns error (no I/O)
+- ✅ Test `AddTask` with long description returns error (no I/O)
+- ✅ Test `ListTasks("")` returns all tasks
+- ✅ Test `ListTasks("done")` returns only done tasks
+- ✅ Test `ListTasks("invalid")` returns error
+- ✅ Test `UpdateTask` with valid input updates description and `UpdatedAt`
+- ✅ Test `UpdateTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `DeleteTask` removes task
+- ✅ Test `DeleteTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `MarkTask` transitions status correctly
+- ✅ Test `MarkTask` with unknown ID returns `ErrTaskNotFound`
+- ✅ Test `MarkTask` with invalid status returns error
 
 **Definition of Done:**
 
-- [ ] All use cases operate correctly with a mock repository
-- [ ] No business logic leaks into the CLI or repository layers
-- [ ] Coverage > 90%
+- ✅ All use cases operate correctly with a mock repository
+- ✅ No business logic leaks into the CLI or repository layers
+- ✅ Coverage > 90%
 
 ---
 
