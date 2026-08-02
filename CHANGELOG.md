@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/mmk31585/task-cli/compare/v1.0.0...v1.1.0) (2026-07-29)
+
+
+### Features
+
+* add roadmap url ([425832f](https://github.com/mmk31585/task-cli/commit/425832f54084510d260fcb3267d7d0f8275d2197))
+
 ## 1.0.0 (2026-07-29)
 
 
